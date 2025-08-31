@@ -1,8 +1,11 @@
 // This file defines the structure of an Invitation object
 // that we receive from the Strapi API.
 
+import type { Theme } from "./theme";
+
 export interface Invitation {
   id: number;
+  documentId: string;
   invitationTitle: string;
   invitationUrl: string;
   invitationType: "Wedding" | "Event";
@@ -11,4 +14,7 @@ export interface Invitation {
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;
+  theme: {
+    data: Theme;
+  };
 }

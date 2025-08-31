@@ -104,7 +104,7 @@ export default function DashboardPage() {
                     </span>
                   </p>
                 </div>
-                <Link href={`/invitations/editor/${invitation.id}`}>
+                <Link href={`/invitations/editor/${invitation.documentId}`}>
                   <button
                     type="button"
                     className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition"

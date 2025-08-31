@@ -5,7 +5,7 @@ export interface Theme {
   themeName: string;
   slug: string;
   thumbnailUrl: string;
-  // We don't need the full structure_blueprint on the listing page
+  structure_blueprint: any; // Using 'any' for now, can be typed more strictly later
   createdAt: string;
   updatedAt: string;
   publishedAt: string;

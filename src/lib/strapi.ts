@@ -1,5 +1,6 @@
 // src/lib/strapi.ts
 
+import { signOut } from "next-auth/react";
 import type { Invitation } from "@/types/invitation";
 import type { Theme } from "@/types/theme";
 import type { User } from "@/types/user";
@@ -32,6 +33,15 @@ async function fetchApi(endpoint: string, options: RequestInit = {}) {
     const response = await fetch(requestUrl, mergedOptions);
 
     if (!response.ok) {
+      // If the error is a 401 Unauthorized, it means the user's token is invalid.
+      // We should automatically log them out.
+      if (response.status === 401) {
+        console.error("Unauthorized request. Signing out...");
+        signOut({ callbackUrl: "/login" });
+        // Throw an error to stop the current execution chain.
+        throw new Error("Your session has expired. Please log in again.");
+      }
+
       const errorData = await response.json();
       console.error("Strapi API Error:", errorData);
       const errorMessage =
@@ -146,5 +156,47 @@ export async function createInvitation(
     }),
   });
 
+  return response.data;
+}
+
+/**
+ * Fetches a single invitation by its ID, ensuring to populate the theme.
+ * @param id The ID of the invitation.
+ * @param jwt The user's JSON Web Token.
+ * @returns The invitation object with its theme data.
+ */
+export async function getInvitationById(
+  id: string,
+  jwt: string,
+): Promise<Invitation> {
+  // We add `publicationState=preview` to include draft entries in the result.
+  const query = `/api/invitations/${id}?populate=theme&publicationState=preview`;
+  const response = await fetchApi(query, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${jwt}` },
+  });
+  return response.data;
+}
+
+/**
+ * Updates an invitation.
+ * @param id The ID of the invitation to update.
+ * @param data The data to update.
+ * @param jwt The user's JSON Web Token.
+ * @returns The updated invitation object.
+ */
+export async function updateInvitation(
+  id: string,
+  data: object,
+  jwt: string,
+): Promise<Invitation> {
+  const response = await fetchApi(`/api/invitations/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ data }), // Strapi expects the data to be wrapped in a 'data' object
+  });
   return response.data;
 }

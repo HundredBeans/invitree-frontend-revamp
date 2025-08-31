@@ -54,7 +54,7 @@ export default function NewInvitationPage() {
 
       const newInvitation = await createInvitation(themeId, userId, jwt);
       // Redirect to the editor page for the new invitation
-      router.push(`/invitations/editor/${newInvitation.id}`);
+      router.push(`/invitations/editor/${newInvitation.documentId}`);
     } catch (err: any) {
       setError(err.message || "Could not create invitation.");
       setIsCreating(false);
