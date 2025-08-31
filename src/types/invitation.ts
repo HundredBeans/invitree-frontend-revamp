@@ -14,7 +14,6 @@ export interface Invitation {
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;
-  theme: {
-    data: Theme;
-  };
+  theme: Theme;
+  content: any;
 }
