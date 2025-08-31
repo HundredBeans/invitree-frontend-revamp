@@ -11,6 +11,7 @@ import {
   FormInput,
   FormTextarea,
 } from "@/components/ui";
+import { useErrorHandler } from "@/hooks/use-error-handler";
 import { getInvitationById, updateInvitation } from "@/lib/strapi";
 import type { Invitation, InvitationContent } from "@/types/invitation";
 import type { ThemeField, ThemeSection } from "@/types/theme";
@@ -23,8 +24,8 @@ export default function InvitationEditorPage() {
 
   const [invitation, setInvitation] = useState<Invitation | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const { handleError, showSuccess } = useErrorHandler();
 
   // --- NEW: Separate state for top-level fields ---
   const [invitationTitle, setInvitationTitle] = useState("");
@@ -70,13 +71,14 @@ export default function InvitationEditorPage() {
       setFormData(initialFormData);
     } catch (err: unknown) {
       console.error(err);
-      setError(
+      handleError(
+        err,
         "Failed to load invitation data. You may not have permission to view this.",
       );
     } finally {
       setLoading(false);
     }
-  }, [documentId, session]);
+  }, [documentId, session, handleError]);
 
   useEffect(() => {
     if (sessionStatus === "authenticated") {
@@ -103,7 +105,6 @@ export default function InvitationEditorPage() {
   const handleSave = async () => {
     if (!documentId || !session) return;
     setIsSaving(true);
-    setError(null);
 
     try {
       const jwt = session.user?.jwt;
@@ -117,16 +118,14 @@ export default function InvitationEditorPage() {
       };
 
       await updateInvitation(documentId, updatePayload, jwt);
-      alert("Invitation saved successfully!");
+      showSuccess("Invitation saved successfully!");
 
       // Refetch data to get the latest state (e.g., updated title in the header)
       const updatedData = await getInvitationById(documentId, jwt);
       setInvitation(updatedData);
     } catch (err: unknown) {
       console.error(err);
-      setError(
-        err instanceof Error ? err.message : "Failed to save invitation.",
-      );
+      handleError(err, "Failed to save invitation. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -134,10 +133,6 @@ export default function InvitationEditorPage() {
 
   if (loading || sessionStatus === "loading") {
     return <div className="text-center p-10">Loading Editor...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center p-10 text-red-500">{error}</div>;
   }
 
   if (!invitation) {

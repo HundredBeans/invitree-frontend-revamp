@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { Suspense, useEffect, useState } from "react";
 import { Button, Card, CardContent, FormInput } from "@/components/ui";
+import { useErrorHandler } from "@/hooks/use-error-handler";
 
 function LoginPageContent() {
   const router = useRouter();
@@ -21,10 +22,15 @@ function LoginPageContent() {
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(
-    errorParam ? "Invalid username or password" : null,
-  );
   const [isLoading, setIsLoading] = useState(false);
+  const { handleError, clearError, showSuccess } = useErrorHandler();
+
+  // Handle URL error parameter
+  useEffect(() => {
+    if (errorParam) {
+      handleError("Invalid username or password");
+    }
+  }, [errorParam, handleError]);
 
   // Show loading while checking authentication status
   if (status === "loading") {
@@ -42,26 +48,31 @@ function LoginPageContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    clearError();
     setIsLoading(true);
 
-    // Use the signIn function from NextAuth
-    const result = await signIn("credentials", {
-      // Pass the credentials to our authorize function
-      identifier,
-      password,
-      // Tell NextAuth to not redirect us automatically, we'll handle it
-      redirect: false,
-    });
+    try {
+      // Use the signIn function from NextAuth
+      const result = await signIn("credentials", {
+        // Pass the credentials to our authorize function
+        identifier,
+        password,
+        // Tell NextAuth to not redirect us automatically, we'll handle it
+        redirect: false,
+      });
 
-    setIsLoading(false);
-
-    if (result?.error) {
-      // If there's an error, NextAuth returns it here
-      setError("Invalid username or password.");
-    } else if (result?.ok) {
-      // If sign-in is successful, redirect to the dashboard
-      router.push("/dashboard");
+      if (result?.error) {
+        // If there's an error, NextAuth returns it here
+        handleError("Invalid username or password.");
+      } else if (result?.ok) {
+        // If sign-in is successful, show success message and redirect
+        showSuccess("Successfully signed in!");
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      handleError(error, "Failed to sign in. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -74,7 +85,7 @@ function LoginPageContent() {
             <p className="mt-2 text-gray-600">Welcome back! Please sign in.</p>
           </div>
 
-          {wasRegistrationSuccessful && !error && (
+          {wasRegistrationSuccessful && (
             <div className="p-3 text-sm text-green-800 bg-green-100 border border-green-200 rounded-md">
               <p>
                 <span className="font-semibold">Success!</span> Your account has
@@ -95,7 +106,6 @@ function LoginPageContent() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setIdentifier(e.target.value)
               }
-              error={error}
             />
             <FormInput
               id="password"

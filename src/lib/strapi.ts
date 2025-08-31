@@ -1,6 +1,6 @@
 // src/lib/strapi.ts
 
-import { signOut } from "next-auth/react";
+import { ApiErrorHandler } from "@/lib/api-error-handler";
 import type {
   ApiRequestOptions,
   StrapiCollectionResponse,
@@ -45,36 +45,9 @@ async function fetchApi<T = unknown>(
 
   const requestUrl = `${STRAPI_URL}${endpoint}`;
 
-  try {
-    const response = await fetch(requestUrl, mergedOptions);
-
-    if (!response.ok) {
-      // If the error is a 401 Unauthorized, it means the user's token is invalid.
-      // We should automatically log them out.
-      if (response.status === 401) {
-        console.error("Unauthorized request. Signing out...");
-        signOut({ callbackUrl: "/login" });
-        // Throw an error to stop the current execution chain.
-        throw new Error("Your session has expired. Please log in again.");
-      }
-
-      const errorData = await response.json();
-      console.error("Strapi API Error:", errorData);
-      const errorMessage =
-        errorData.error?.message || "An unknown error occurred.";
-      throw new Error(errorMessage);
-    }
-
-    // Handle responses that might not have a body (e.g., 204 No Content)
-    const contentType = response.headers.get("content-type");
-    if (contentType && contentType.indexOf("application/json") !== -1) {
-      return await response.json();
-    }
-    return {} as T; // Return empty object for non-json responses
-  } catch (error) {
-    console.error("Fetch API failed:", error);
-    throw error;
-  }
+  // Use the centralized error handler
+  const apiErrorHandler = ApiErrorHandler;
+  return apiErrorHandler.safeFetch<T>(requestUrl, mergedOptions);
 }
 
 /**
