@@ -1,6 +1,7 @@
 // src/lib/strapi.ts
 
 import type { Invitation } from "@/types/invitation";
+import type { Theme } from "@/types/theme";
 import type { User } from "@/types/user";
 
 // Get the Strapi URL from the environment variables, with a fallback for safety.
@@ -102,5 +103,48 @@ export async function getUserInvitations(
   console.log("response", response);
 
   // The response from Strapi is often { data: [...], meta: {...} }
+  return response.data;
+}
+
+/**
+ * Fetches all available themes from Strapi.
+ * This is a public request and does not require authentication.
+ * @returns A list of all themes.
+ */
+export async function getThemes(): Promise<Theme[]> {
+  const response = await fetchApi("/api/themes");
+  return response.data;
+}
+
+/**
+ * Creates a new draft invitation for a user.
+ * @param themeId The ID of the theme being used.
+ * @param userId The ID of the owner.
+ * @param jwt The user's JSON Web Token for authentication.
+ * @returns The newly created invitation object.
+ */
+export async function createInvitation(
+  themeId: number,
+  userId: number,
+  jwt: string,
+): Promise<Invitation> {
+  const response = await fetchApi("/api/invitations", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      data: {
+        // We'll pre-fill with some defaults. The user will change these in the editor.
+        invitationTitle: "Untitled Invitation",
+        invitationUrl: `draft-${Date.now()}`, // Temporary unique URL
+        invitationType: "Event", // Default type, can be improved later
+        theme: themeId,
+        owner: userId,
+      },
+    }),
+  });
+
   return response.data;
 }

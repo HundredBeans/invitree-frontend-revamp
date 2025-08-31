@@ -2,6 +2,7 @@
 
 "use client";
 
+import Link from "next/link"; // <-- IMPORT LINK
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -16,21 +17,14 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // If the session is loading, do nothing yet.
-    if (status === "loading") {
-      return;
-    }
-
-    // If the user is not authenticated, redirect to the login page.
+    if (status === "loading") return;
     if (!session) {
       router.push("/login");
       return;
     }
 
-    // Fetch invitations when the session is available.
     const fetchInvitations = async () => {
       try {
-        // We get the user ID and JWT from the session object we configured in NextAuth.
         const userId = (session.user as any)?.id;
         const jwt = (session.user as any)?.jwt;
 
@@ -55,11 +49,7 @@ export default function DashboardPage() {
     return <div className="text-center p-10">Loading...</div>;
   }
 
-  if (!session) {
-    // This case is handled by the useEffect, but it's good practice
-    // to have a fallback render state.
-    return null;
-  }
+  if (!session) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center p-4 sm:p-8">
@@ -114,12 +104,14 @@ export default function DashboardPage() {
                     </span>
                   </p>
                 </div>
-                <button
-                  type="button"
-                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition"
-                >
-                  Edit
-                </button>
+                <Link href={`/invitations/editor/${invitation.id}`}>
+                  <button
+                    type="button"
+                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition"
+                  >
+                    Edit
+                  </button>
+                </Link>
               </div>
             ))
           ) : (
@@ -127,12 +119,15 @@ export default function DashboardPage() {
               <p className="text-gray-500">
                 You don't have any invitations yet.
               </p>
-              <button
-                type="button"
-                className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-              >
-                Create New Invitation
-              </button>
+              {/* --- THIS IS THE UPDATED BUTTON --- */}
+              <Link href="/invitations/new">
+                <button
+                  type="button"
+                  className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                >
+                  Create New Invitation
+                </button>
+              </Link>
             </div>
           )}
         </div>
