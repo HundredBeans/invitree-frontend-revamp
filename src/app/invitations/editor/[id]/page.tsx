@@ -17,8 +17,10 @@ export default function InvitationEditorPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // This state will hold all the data for our dynamic form
-  const [formData, setFormData] = useState<any>({});
+  // --- NEW: Separate state for top-level fields ---
+  const [invitationTitle, setInvitationTitle] = useState("");
+  const [invitationUrl, setInvitationUrl] = useState("");
+  const [formData, setFormData] = useState<any>({}); // For the dynamic 'content'
 
   const fetchInvitationData = useCallback(async () => {
     if (!documentId || !session) return;
@@ -28,14 +30,16 @@ export default function InvitationEditorPage() {
       const data = await getInvitationById(documentId, jwt);
       setInvitation(data);
 
-      // --- SMART INFERENCE LOGIC ---
+      // Initialize all form states
+      setInvitationTitle(data.invitationTitle);
+      setInvitationUrl(data.invitationUrl);
+
       let initialFormData = data.content || {};
       const blueprint = data.theme?.structure_blueprint;
 
       if (blueprint && blueprint.sections) {
         blueprint.sections.forEach((section: any) => {
           section.fields.forEach((field: any) => {
-            // Check if a field can be inferred and if it's currently empty
             const topLevelDataKey = field.inferredFrom as keyof Invitation;
             if (
               field.inferredFrom &&
@@ -43,19 +47,15 @@ export default function InvitationEditorPage() {
               (!initialFormData[section.id] ||
                 !initialFormData[section.id][field.id])
             ) {
-              // Ensure section object exists
               if (!initialFormData[section.id]) {
                 initialFormData[section.id] = {};
               }
-              // Pre-populate the form data
               initialFormData[section.id][field.id] = data[topLevelDataKey];
             }
           });
         });
       }
       setFormData(initialFormData);
-      console.log("initialFormData", initialFormData);
-      // --- END OF LOGIC ---
     } catch (err: any) {
       console.error(err);
       setError(
@@ -63,15 +63,11 @@ export default function InvitationEditorPage() {
       );
     } finally {
       setLoading(false);
-      console.log("setLoading false");
     }
   }, [documentId, session]);
 
   useEffect(() => {
-    console.log("sessionStatus", sessionStatus);
-    // console.log("loading", loading);
     if (sessionStatus === "authenticated") {
-      console.log("fetching invitation data");
       fetchInvitationData();
     } else if (sessionStatus === "unauthenticated") {
       router.push("/login");
@@ -101,10 +97,17 @@ export default function InvitationEditorPage() {
       const jwt = (session.user as any)?.jwt;
       if (!jwt) throw new Error("Authentication token not found.");
 
-      // We save the entire formData object into the 'content' field
-      await updateInvitation(documentId, { content: formData }, jwt);
+      // --- NEW: Combine all data for the update payload ---
+      const updatePayload = {
+        invitationTitle,
+        invitationUrl,
+        content: formData,
+      };
+
+      await updateInvitation(documentId, updatePayload, jwt);
       alert("Invitation saved successfully!");
-      // Refetch data to show the latest saved state without a full reload
+
+      // Refetch data to get the latest state (e.g., updated title in the header)
       const updatedData = await getInvitationById(documentId, jwt);
       setInvitation(updatedData);
     } catch (err: any) {
@@ -148,6 +151,51 @@ export default function InvitationEditorPage() {
           </div>
 
           <div className="space-y-8">
+            {/* --- NEW "GENERAL SETTINGS" SECTION --- */}
+            <div>
+              <h2 className="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">
+                General Settings
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="invitationTitle"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Invitation Title
+                  </label>
+                  <input
+                    type="text"
+                    id="invitationTitle"
+                    value={invitationTitle}
+                    onChange={(e) => setInvitationTitle(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="invitationUrl"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Invitation URL
+                  </label>
+                  <div className="mt-1 flex rounded-md shadow-sm">
+                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                      invitree.id/
+                    </span>
+                    <input
+                      type="text"
+                      id="invitationUrl"
+                      value={invitationUrl}
+                      onChange={(e) => setInvitationUrl(e.target.value)}
+                      className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* --- DYNAMIC THEME SECTIONS --- */}
             {blueprint && blueprint.sections ? (
               blueprint.sections.map((section: any) => (
                 <div key={section.id}>
