@@ -1,9 +1,22 @@
 // src/lib/strapi.ts
 
 import { signOut } from "next-auth/react";
-import type { Invitation } from "@/types/invitation";
+import type {
+  ApiRequestOptions,
+  StrapiCollectionResponse,
+  StrapiSingleResponse,
+} from "@/types/api";
+import type {
+  LoginCredentials,
+  RegisterData,
+  StrapiAuthResponse,
+} from "@/types/auth";
+import type {
+  CreateInvitationData,
+  Invitation,
+  UpdateInvitationData,
+} from "@/types/invitation";
 import type { Theme } from "@/types/theme";
-import type { User } from "@/types/user";
 
 // Get the Strapi URL from the environment variables, with a fallback for safety.
 const STRAPI_URL =
@@ -15,7 +28,10 @@ const STRAPI_URL =
  * @param options The options for the fetch request (method, headers, body).
  * @returns The JSON response from the API.
  */
-async function fetchApi(endpoint: string, options: RequestInit = {}) {
+async function fetchApi<T = unknown>(
+  endpoint: string,
+  options: ApiRequestOptions = {},
+): Promise<T> {
   const defaultOptions: RequestInit = {
     headers: {
       "Content-Type": "application/json",
@@ -54,7 +70,7 @@ async function fetchApi(endpoint: string, options: RequestInit = {}) {
     if (contentType && contentType.indexOf("application/json") !== -1) {
       return await response.json();
     }
-    return {}; // Return empty object for non-json responses
+    return {} as T; // Return empty object for non-json responses
   } catch (error) {
     console.error("Fetch API failed:", error);
     throw error;
@@ -66,8 +82,10 @@ async function fetchApi(endpoint: string, options: RequestInit = {}) {
  * @param userData The user data for registration.
  * @returns The newly created user object.
  */
-export async function registerUser(userData: any): Promise<User> {
-  return fetchApi("/api/auth/local/register", {
+export async function registerUser(
+  userData: RegisterData,
+): Promise<StrapiAuthResponse> {
+  return fetchApi<StrapiAuthResponse>("/api/auth/local/register", {
     method: "POST",
     body: JSON.stringify(userData),
   });
@@ -79,9 +97,9 @@ export async function registerUser(userData: any): Promise<User> {
  * @returns An object containing the JWT and the user data.
  */
 export async function loginUser(
-  credentials: any,
-): Promise<{ jwt: string; user: User }> {
-  return fetchApi("/api/auth/local", {
+  credentials: LoginCredentials,
+): Promise<StrapiAuthResponse> {
+  return fetchApi<StrapiAuthResponse>("/api/auth/local", {
     method: "POST",
     body: JSON.stringify(credentials),
   });
@@ -104,7 +122,7 @@ export async function getUserInvitations(
 
   const query = `/api/invitations?filters[owner][id][$eq]=${userId}&populate=*`;
 
-  const response = await fetchApi(query, {
+  const response = await fetchApi<StrapiCollectionResponse<Invitation>>(query, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${jwt}`,
@@ -122,7 +140,8 @@ export async function getUserInvitations(
  * @returns A list of all themes.
  */
 export async function getThemes(): Promise<Theme[]> {
-  const response = await fetchApi("/api/themes");
+  const response =
+    await fetchApi<StrapiCollectionResponse<Theme>>("/api/themes");
   return response.data;
 }
 
@@ -138,23 +157,27 @@ export async function createInvitation(
   userId: number,
   jwt: string,
 ): Promise<Invitation> {
-  const response = await fetchApi("/api/invitations", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${jwt}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      data: {
-        // We'll pre-fill with some defaults. The user will change these in the editor.
-        invitationTitle: "Untitled Invitation",
-        invitationUrl: `draft-${Date.now()}`, // Temporary unique URL
-        invitationType: "Event", // Default type, can be improved later
-        theme: themeId,
-        owner: userId,
+  const createData: CreateInvitationData = {
+    invitationTitle: "Untitled Invitation",
+    invitationUrl: `draft-${Date.now()}`, // Temporary unique URL
+    invitationType: "Event", // Default type, can be improved later
+    theme: themeId,
+    owner: userId,
+  };
+
+  const response = await fetchApi<StrapiSingleResponse<Invitation>>(
+    "/api/invitations",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+        "Content-Type": "application/json",
       },
-    }),
-  });
+      body: JSON.stringify({
+        data: createData,
+      }),
+    },
+  );
 
   return response.data;
 }
@@ -171,7 +194,7 @@ export async function getInvitationById(
 ): Promise<Invitation> {
   // We add `publicationState=preview` to include draft entries in the result.
   const query = `/api/invitations/${id}?populate=theme&publicationState=preview`;
-  const response = await fetchApi(query, {
+  const response = await fetchApi<StrapiSingleResponse<Invitation>>(query, {
     method: "GET",
     headers: { Authorization: `Bearer ${jwt}` },
   });
@@ -187,16 +210,19 @@ export async function getInvitationById(
  */
 export async function updateInvitation(
   id: string,
-  data: object,
+  data: UpdateInvitationData,
   jwt: string,
 ): Promise<Invitation> {
-  const response = await fetchApi(`/api/invitations/${id}`, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${jwt}`,
-      "Content-Type": "application/json",
+  const response = await fetchApi<StrapiSingleResponse<Invitation>>(
+    `/api/invitations/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ data }), // Strapi expects the data to be wrapped in a 'data' object
     },
-    body: JSON.stringify({ data }), // Strapi expects the data to be wrapped in a 'data' object
-  });
+  );
   return response.data;
 }

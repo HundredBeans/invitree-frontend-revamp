@@ -3,8 +3,17 @@
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  FormInput,
+  FormTextarea,
+} from "@/components/ui";
 import { getInvitationById, updateInvitation } from "@/lib/strapi";
-import type { Invitation } from "@/types/invitation";
+import type { Invitation, InvitationContent } from "@/types/invitation";
+import type { ThemeField, ThemeSection } from "@/types/theme";
 
 export default function InvitationEditorPage() {
   const { data: session, status: sessionStatus } = useSession();
@@ -20,12 +29,12 @@ export default function InvitationEditorPage() {
   // --- NEW: Separate state for top-level fields ---
   const [invitationTitle, setInvitationTitle] = useState("");
   const [invitationUrl, setInvitationUrl] = useState("");
-  const [formData, setFormData] = useState<any>({}); // For the dynamic 'content'
+  const [formData, setFormData] = useState<InvitationContent>({}); // For the dynamic 'content'
 
   const fetchInvitationData = useCallback(async () => {
     if (!documentId || !session) return;
     try {
-      const jwt = (session.user as any)?.jwt;
+      const jwt = session.user?.jwt;
       if (!jwt) throw new Error("Authentication token not found.");
       const data = await getInvitationById(documentId, jwt);
       setInvitation(data);
@@ -34,12 +43,12 @@ export default function InvitationEditorPage() {
       setInvitationTitle(data.invitationTitle);
       setInvitationUrl(data.invitationUrl);
 
-      let initialFormData = data.content || {};
+      const initialFormData = data.content || {};
       const blueprint = data.theme?.structure_blueprint;
 
-      if (blueprint && blueprint.sections) {
-        blueprint.sections.forEach((section: any) => {
-          section.fields.forEach((field: any) => {
+      if (blueprint?.sections) {
+        blueprint.sections.forEach((section: ThemeSection) => {
+          section.fields.forEach((field: ThemeField) => {
             const topLevelDataKey = field.inferredFrom as keyof Invitation;
             if (
               field.inferredFrom &&
@@ -50,13 +59,16 @@ export default function InvitationEditorPage() {
               if (!initialFormData[section.id]) {
                 initialFormData[section.id] = {};
               }
-              initialFormData[section.id][field.id] = data[topLevelDataKey];
+              const value = data[topLevelDataKey];
+              // Ensure we only assign string values to form fields
+              initialFormData[section.id][field.id] =
+                typeof value === "string" ? value : String(value);
             }
           });
         });
       }
       setFormData(initialFormData);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError(
         "Failed to load invitation data. You may not have permission to view this.",
@@ -79,7 +91,7 @@ export default function InvitationEditorPage() {
     fieldId: string,
     value: string,
   ) => {
-    setFormData((prevData: any) => ({
+    setFormData((prevData: InvitationContent) => ({
       ...prevData,
       [sectionId]: {
         ...prevData[sectionId],
@@ -94,7 +106,7 @@ export default function InvitationEditorPage() {
     setError(null);
 
     try {
-      const jwt = (session.user as any)?.jwt;
+      const jwt = session.user?.jwt;
       if (!jwt) throw new Error("Authentication token not found.");
 
       // --- NEW: Combine all data for the update payload ---
@@ -110,9 +122,11 @@ export default function InvitationEditorPage() {
       // Refetch data to get the latest state (e.g., updated title in the header)
       const updatedData = await getInvitationById(documentId, jwt);
       setInvitation(updatedData);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || "Failed to save invitation.");
+      setError(
+        err instanceof Error ? err.message : "Failed to save invitation.",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -133,45 +147,32 @@ export default function InvitationEditorPage() {
   const blueprint = invitation.theme?.structure_blueprint;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-muted/30 p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="flex justify-between items-center mb-6 border-b pb-4">
-            <h1 className="text-3xl font-bold text-gray-800">
+        <Card className="p-8">
+          <CardHeader className="flex flex-row items-center justify-between pb-4">
+            <h1 className="text-3xl font-bold text-foreground">
               Editing: {invitation.invitationTitle}
             </h1>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={isSaving}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition"
-            >
+            <Button onClick={handleSave} disabled={isSaving}>
               {isSaving ? "Saving..." : "Save Changes"}
-            </button>
-          </div>
-
-          <div className="space-y-8">
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-8">
             {/* --- NEW "GENERAL SETTINGS" SECTION --- */}
             <div>
-              <h2 className="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">
+              <h2 className="text-xl font-semibold text-foreground mb-4 border-b pb-2">
                 General Settings
               </h2>
               <div className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="invitationTitle"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Invitation Title
-                  </label>
-                  <input
-                    type="text"
-                    id="invitationTitle"
-                    value={invitationTitle}
-                    onChange={(e) => setInvitationTitle(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
-                </div>
+                <FormInput
+                  id="invitationTitle"
+                  label="Invitation Title"
+                  value={invitationTitle}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setInvitationTitle(e.target.value)
+                  }
+                />
                 <div>
                   <label
                     htmlFor="invitationUrl"
@@ -196,50 +197,48 @@ export default function InvitationEditorPage() {
             </div>
 
             {/* --- DYNAMIC THEME SECTIONS --- */}
-            {blueprint && blueprint.sections ? (
-              blueprint.sections.map((section: any) => (
+            {blueprint?.sections ? (
+              blueprint.sections.map((section: ThemeSection) => (
                 <div key={section.id}>
-                  <h2 className="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">
+                  <h2 className="text-xl font-semibold text-foreground mb-4 border-b pb-2">
                     {section.name}
                   </h2>
                   <div className="space-y-4">
-                    {section.fields.map((field: any) => (
+                    {section.fields.map((field: ThemeField) => (
                       <div key={field.id}>
-                        <label
-                          htmlFor={`${section.id}-${field.id}`}
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          {field.label}
-                        </label>
                         {field.type === "textarea" ? (
-                          <textarea
+                          <FormTextarea
                             id={`${section.id}-${field.id}`}
-                            rows={4}
+                            label={field.label}
                             placeholder={field.placeholder}
+                            rows={4}
                             value={formData[section.id]?.[field.id] || ""}
-                            onChange={(e) =>
+                            onChange={(
+                              e: React.ChangeEvent<HTMLTextAreaElement>,
+                            ) =>
                               handleInputChange(
                                 section.id,
                                 field.id,
                                 e.target.value,
                               )
                             }
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                           />
                         ) : (
-                          <input
+                          <FormInput
                             type={field.type}
                             id={`${section.id}-${field.id}`}
+                            label={field.label}
                             placeholder={field.placeholder}
                             value={formData[section.id]?.[field.id] || ""}
-                            onChange={(e) =>
+                            onChange={(
+                              e: React.ChangeEvent<HTMLInputElement>,
+                            ) =>
                               handleInputChange(
                                 section.id,
                                 field.id,
                                 e.target.value,
                               )
                             }
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                           />
                         )}
                       </div>
@@ -248,12 +247,12 @@ export default function InvitationEditorPage() {
                 </div>
               ))
             ) : (
-              <p className="text-gray-500">
+              <p className="text-muted-foreground text-center py-8">
                 This theme has no editable fields defined.
               </p>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
