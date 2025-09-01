@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label } from "@/components/ui";
+import { TreePine } from "lucide-react";
 import { registerUser } from "@/lib/strapi";
 
 export default function SignupPage() {
@@ -70,9 +71,7 @@ export default function SignupPage() {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600 text-white">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
+              <TreePine className="w-6 h-6" />
             </div>
           </div>
           <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>
