@@ -1,12 +1,21 @@
-import { SidebarTrigger, Separator, Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbPage } from "@/components/ui";
+"use client";
+
+import { SidebarTrigger, Separator, Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 export function DashboardHeader() {
-  const path = window.location.pathname;
-  const pathArray = path.split("/").filter(Boolean);
+  const pathname = usePathname();
+  const pathArray = pathname.split("/").filter(Boolean);
   const breadcrumbItems = pathArray.map((item, index) => (
-    <BreadcrumbItem key={index}>
-      <BreadcrumbPage className="capitalize">{item.replace("-", " ")}</BreadcrumbPage>
-    </BreadcrumbItem>
+    <>
+      <BreadcrumbItem key={index}>
+        <Link href={`/${pathArray.slice(0, index + 1).join("/")}`}>
+          <BreadcrumbPage className="capitalize">{item.replace("-", " ")}</BreadcrumbPage>
+        </Link>
+      </BreadcrumbItem>
+      {index < pathArray.length - 1 && <BreadcrumbSeparator key={`sep-${index}`} />}
+    </>
   ))
 
   return (
@@ -19,7 +28,6 @@ export function DashboardHeader() {
         />
         <Breadcrumb>
           <BreadcrumbList>
-            {/* Generate breadcrumb from url */}
             {breadcrumbItems}
           </BreadcrumbList>
         </Breadcrumb>
