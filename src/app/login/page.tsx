@@ -19,7 +19,7 @@ export default function LoginPage() {
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (status === "authenticated") {
-      router.push("/dashboard");
+      router.push("/invitations");
     }
   }, [status, router]);
 
@@ -58,7 +58,7 @@ export default function LoginPage() {
         // Get the updated session
         const session = await getSession();
         if (session) {
-          router.push("/dashboard");
+          router.push("/invitations");
         }
       }
     } catch (error) {

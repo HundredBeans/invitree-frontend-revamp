@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label } from "@/components/ui";
@@ -20,7 +20,7 @@ export default function SignupPage() {
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (status === "authenticated") {
-      router.push("/dashboard");
+      router.push("/invitations");
     }
   }, [status, router]);
 

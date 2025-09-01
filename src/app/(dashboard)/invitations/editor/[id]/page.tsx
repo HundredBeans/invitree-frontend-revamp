@@ -11,6 +11,7 @@ import {
   FormInput,
   FormTextarea,
 } from "@/components/ui";
+import { InvitationPreview } from "@/components/invitation-preview";
 import { useErrorHandler } from "@/hooks/use-error-handler";
 import { getInvitationById, updateInvitation } from "@/lib/strapi";
 import type { Invitation, InvitationContent } from "@/types/invitation";
@@ -143,16 +144,24 @@ export default function InvitationEditorPage() {
 
   return (
     <div className="min-h-screen bg-muted/30 p-8">
-      <div className="max-w-4xl mx-auto">
-        <Card className="p-8">
-          <CardHeader className="flex flex-row items-center justify-between pb-4">
-            <h1 className="text-3xl font-bold text-foreground">
-              Editing: {invitation.invitationTitle}
-            </h1>
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? "Saving..." : "Save Changes"}
-            </Button>
-          </CardHeader>
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-foreground">
+            Editing: {invitation.invitationTitle}
+          </h1>
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
+
+        {/* Two-column layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Editor Column */}
+          <Card className="p-6">
+            <CardHeader className="px-0 pt-0">
+              <h2 className="text-xl font-semibold">Edit Content</h2>
+            </CardHeader>
           <CardContent className="space-y-8">
             {/* --- NEW "GENERAL SETTINGS" SECTION --- */}
             <div>
@@ -168,26 +177,15 @@ export default function InvitationEditorPage() {
                     setInvitationTitle(e.target.value)
                   }
                 />
-                <div>
-                  <label
-                    htmlFor="invitationUrl"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Invitation URL
-                  </label>
-                  <div className="mt-1 flex rounded-md shadow-sm">
-                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                      invitree.id/
-                    </span>
-                    <input
-                      type="text"
-                      id="invitationUrl"
-                      value={invitationUrl}
-                      onChange={(e) => setInvitationUrl(e.target.value)}
-                      className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300"
-                    />
-                  </div>
-                </div>
+                <FormInput
+                  id="invitationUrl"
+                  label="Invitation URL"
+                  value={invitationUrl}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setInvitationUrl(e.target.value)
+                  }
+                  helperText="This will be the URL slug for your invitation (e.g., /my-wedding)"
+                />
               </div>
             </div>
 
@@ -246,8 +244,19 @@ export default function InvitationEditorPage() {
                 This theme has no editable fields defined.
               </p>
             )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          {/* Preview Column */}
+          <div className="lg:sticky lg:top-8 lg:h-fit">
+            <InvitationPreview
+              invitation={invitation}
+              formData={formData}
+              invitationTitle={invitationTitle}
+              invitationUrl={invitationUrl}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

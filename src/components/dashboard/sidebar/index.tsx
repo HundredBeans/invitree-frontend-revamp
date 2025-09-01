@@ -6,7 +6,7 @@ import {
   Bot,
   Settings2,
   SquareTerminal,
-  ChartColumn,
+  Mails,
   TreePine
 } from "lucide-react"
 
@@ -37,9 +37,9 @@ const data = {
   },
   navMain: [
     {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: ChartColumn,
+      title: "Invitations",
+      url: "/invitations",
+      icon: Mails,
     }
   ],
   navSecondary: [

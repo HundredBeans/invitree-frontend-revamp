@@ -23,7 +23,7 @@ export function NavSecondary({
   title,
   items,
 }: {
-  title: string
+  title?: string
   items: {
     title: string
     url: string
@@ -37,7 +37,7 @@ export function NavSecondary({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>{title}</SidebarGroupLabel>
+      {title && <SidebarGroupLabel>{title}</SidebarGroupLabel>}
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
