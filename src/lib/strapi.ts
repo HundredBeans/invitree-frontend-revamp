@@ -86,7 +86,7 @@ export async function loginUser(
  * @returns A list of the user's invitations.
  */
 export async function getUserInvitations(
-  userId: number,
+  userId: string,
   jwt: string,
 ): Promise<Invitation[]> {
   if (!userId || !jwt) {
