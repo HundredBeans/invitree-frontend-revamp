@@ -1,149 +1,172 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { signIn, getSession, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
-import { Suspense, useEffect, useState } from "react";
-import { Button, Card, CardContent, FormInput } from "@/components/ui";
-import { useErrorHandler } from "@/hooks/use-error-handler";
+import Link from "next/link";
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label } from "@/components/ui";
 
-function LoginPageContent() {
-  const router = useRouter();
+export default function LoginPage() {
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const wasRegistrationSuccessful = searchParams.get("registered") === "true";
-  const errorParam = searchParams.get("error");
+  const router = useRouter();
 
-  // Redirect to dashboard if already logged in
+  // Redirect to dashboard if already authenticated
   useEffect(() => {
-    if (status === "authenticated" && session) {
+    if (status === "authenticated") {
       router.push("/dashboard");
     }
-  }, [status, session, router]);
-
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const { handleError, clearError, showSuccess } = useErrorHandler();
-
-  // Handle URL error parameter
-  useEffect(() => {
-    if (errorParam) {
-      handleError("Invalid username or password");
-    }
-  }, [errorParam, handleError]);
+  }, [status, router]);
 
   // Show loading while checking authentication status
   if (status === "loading") {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-muted/30">
-        <div>Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-gray-600">Loading...</span>
+        </div>
       </div>
     );
   }
 
-  // Don't render login form if user is authenticated
+  // Don't render login form if already authenticated
   if (status === "authenticated") {
     return null;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearError();
-    setIsLoading(true);
+    setLoading(true);
+    setError("");
 
     try {
-      // Use the signIn function from NextAuth
       const result = await signIn("credentials", {
-        // Pass the credentials to our authorize function
-        identifier,
+        identifier: email,
         password,
-        // Tell NextAuth to not redirect us automatically, we'll handle it
         redirect: false,
       });
 
       if (result?.error) {
-        // If there's an error, NextAuth returns it here
-        handleError("Invalid username or password.");
-      } else if (result?.ok) {
-        // If sign-in is successful, show success message and redirect
-        showSuccess("Successfully signed in!");
-        router.push("/dashboard");
+        setError("Invalid email or password");
+      } else {
+        // Get the updated session
+        const session = await getSession();
+        if (session) {
+          router.push("/dashboard");
+        }
       }
     } catch (error) {
-      handleError(error, "Failed to sign in. Please try again.");
+      setError("An error occurred. Please try again.");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/30 font-sans">
-      <Card className="w-full max-w-md">
-        <CardContent className="p-8 space-y-6">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900">invitree</h1>
-            <p className="mt-2 text-gray-600">Welcome back! Please sign in.</p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600 text-white">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
+            </div>
           </div>
+          <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Sign in to your Invitree account
+          </p>
+        </div>
 
-          {wasRegistrationSuccessful && (
-            <div className="p-3 text-sm text-green-800 bg-green-100 border border-green-200 rounded-md">
-              <p>
-                <span className="font-semibold">Success!</span> Your account has
-                been created. Please log in.
+        {/* Login Form */}
+        <Card className="shadow-lg">
+          <CardHeader className="space-y-1">
+            {wasRegistrationSuccessful ? (
+              <div className="p-3 text-sm text-green-800 bg-green-100 border border-green-200 rounded-md">
+                <p>
+                  <span className="font-semibold">Success!</span> Your account has
+                  been created. Please log in.
+                </p>
+              </div>
+            ) : <>
+              <CardTitle className="text-2xl text-center">Sign in</CardTitle>
+              <CardDescription className="text-center">
+                Enter your email and password to access your account
+              </CardDescription>
+            </>}
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="Enter your email"
+                  className="h-11"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Enter your password"
+                  className="h-11"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full h-11"
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Signing in...
+                  </div>
+                ) : (
+                  "Sign in"
+                )}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{" "}
+                <Link
+                  href="/signup"
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
+                  Sign up
+                </Link>
               </p>
             </div>
-          )}
-
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <FormInput
-              id="identifier"
-              name="identifier"
-              type="text"
-              label="Email or Username"
-              autoComplete="email"
-              required
-              value={identifier}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setIdentifier(e.target.value)
-              }
-            />
-            <FormInput
-              id="password"
-              name="password"
-              type="password"
-              label="Password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setPassword(e.target.value)
-              }
-            />
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? "Signing in..." : "Sign In"}
-            </Button>
-          </form>
-          <p className="text-sm text-center text-muted-foreground">
-            Don't have an account?{" "}
-            <a
-              href="/signup"
-              className="font-medium text-primary hover:text-primary/80"
-            >
-              Sign up
-            </a>
-          </p>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  );
-}
-
-// We wrap the component in a Suspense boundary because useSearchParams
-// requires it in the Next.js App Router.
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <LoginPageContent />
-    </Suspense>
   );
 }
