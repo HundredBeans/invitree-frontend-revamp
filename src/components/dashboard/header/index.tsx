@@ -9,7 +9,7 @@ export function DashboardHeader() {
   const pathArray = pathname.split("/").filter(Boolean);
   const breadcrumbItems = pathArray.map((item, index) => (
     <>
-      <BreadcrumbItem key={index}>
+      <BreadcrumbItem key={item}>
         <Link href={`/${pathArray.slice(0, index + 1).join("/")}`}>
           <BreadcrumbPage className="capitalize">{item.replace("-", " ")}</BreadcrumbPage>
         </Link>
