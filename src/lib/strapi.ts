@@ -168,12 +168,79 @@ export async function getInvitationById(
   jwt: string,
 ): Promise<Invitation> {
   // We add `publicationState=preview` to include draft entries in the result.
-  const query = `/api/invitations/${id}?&publicationState=preview&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate]=*&populate=theme`;
+  const query = `/api/invitations/${id}?&publicationState=preview&populate[theme]=true&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][eventDetails][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][openingSection][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][coverSection][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][medias][populate][medias][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][groomDetails][populate][parentProfiles][populate]=*`;
   const response = await fetchApi<StrapiSingleResponse<Invitation>>(query, {
     method: "GET",
     headers: { Authorization: `Bearer ${jwt}` },
   });
   return response.data;
+}
+
+/**
+ * Clean data for Strapi update by removing problematic fields and handling component structure
+ */
+function cleanDataForUpdate(data: UpdateInvitationData): any {
+  const cleaned: any = {};
+
+  // Copy basic fields
+  if (data.invitationTitle !== undefined) cleaned.invitationTitle = data.invitationTitle;
+  if (data.invitationUrl !== undefined) cleaned.invitationUrl = data.invitationUrl;
+  if (data.invitationStatus !== undefined) cleaned.invitationStatus = data.invitationStatus;
+  if (data.eventDate !== undefined) cleaned.eventDate = data.eventDate;
+
+  // Handle typeSpecificDetails - this is the main component data
+  if (data.typeSpecificDetails) {
+    cleaned.typeSpecificDetails = data.typeSpecificDetails.map((component: any) => {
+      // For updates, we don't need any ID fields - Strapi handles them automatically
+      const cleanedComponent: any = {
+        __component: component.__component,
+      };
+
+      // Copy all other fields, cleaning nested objects (skip __component and id completely)
+      for (const [key, value] of Object.entries(component)) {
+        if (key !== '__component' && key !== 'id') {
+          cleanedComponent[key] = cleanNestedObject(value);
+        }
+      }
+
+      return cleanedComponent;
+    });
+  }
+
+  // Skip the 'content' field as it's just form data, not Strapi data
+  // The actual data should be in typeSpecificDetails
+
+  return cleaned;
+}
+
+/**
+ * Clean nested objects by removing empty values and id fields
+ * Remove all id fields as Strapi handles them automatically during updates
+ */
+function cleanNestedObject(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(item => cleanNestedObject(item));
+  }
+
+  if (obj && typeof obj === 'object') {
+    const cleaned: any = {};
+
+    for (const [key, value] of Object.entries(obj)) {
+      // Skip all id fields - Strapi handles them automatically during updates
+      if (key === 'id') {
+        continue;
+      }
+
+      // Include non-empty values
+      if (value !== null && value !== undefined && value !== '') {
+        cleaned[key] = cleanNestedObject(value);
+      }
+    }
+
+    return cleaned;
+  }
+
+  return obj;
 }
 
 /**
@@ -188,6 +255,12 @@ export async function updateInvitation(
   data: UpdateInvitationData,
   jwt: string,
 ): Promise<Invitation> {
+  // Clean the data to handle nested component IDs properly
+  const cleanedData = cleanDataForUpdate(data);
+
+  // Debug: Log the cleaned data to see what's being sent
+  console.log('Cleaned data being sent to Strapi:', JSON.stringify(cleanedData, null, 2));
+
   const response = await fetchApi<StrapiSingleResponse<Invitation>>(
     `/api/invitations/${id}`,
     {
@@ -196,7 +269,7 @@ export async function updateInvitation(
         Authorization: `Bearer ${jwt}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ data }), // Strapi expects the data to be wrapped in a 'data' object
+      body: JSON.stringify({ data: cleanedData }), // Strapi expects the data to be wrapped in a 'data' object
     },
   );
   return response.data;
