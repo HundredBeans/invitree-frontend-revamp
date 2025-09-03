@@ -10,6 +10,53 @@ export interface InvitationContent {
   };
 }
 
+// Wedding-specific data structures
+export interface CoverSection {
+  id: number;
+  title: string;
+  subtitle?: string | null;
+  header?: string | null;
+  subheader?: string | null;
+}
+
+export interface OpeningSection {
+  id: number;
+  quotes?: string | null;
+  decorationUrl?: string | null;
+  imageUrl?: string | null;
+}
+
+export interface EventDetail {
+  id: number;
+  eventName: string;
+  datetimeStart: string;
+  datetimeEnd: string;
+  eventLocation: string;
+}
+
+export interface GroomDetail {
+  id: number;
+  name: string;
+  gender: "male" | "female";
+  fullName: string;
+  imageUrl?: string | null;
+  birthOrder?: number | null;
+  additionalInfo?: string | null;
+}
+
+export interface WeddingDetails {
+  __component: "invitation-details.wedding-details";
+  id: number;
+  additionalNote?: string | null;
+  coverSection: CoverSection;
+  openingSection: OpeningSection;
+  eventDetails: EventDetail[];
+  medias?: any | null;
+  groomDetails: GroomDetail[];
+}
+
+export type TypeSpecificDetails = WeddingDetails[];
+
 export interface Invitation {
   id: number;
   documentId: string;
@@ -23,6 +70,7 @@ export interface Invitation {
   publishedAt: string | null;
   theme: Theme;
   content: InvitationContent;
+  typeSpecificDetails?: TypeSpecificDetails;
 }
 
 // For creating new invitations
@@ -39,4 +87,5 @@ export interface UpdateInvitationData {
   invitationTitle?: string;
   invitationUrl?: string;
   content?: InvitationContent;
+  typeSpecificDetails?: TypeSpecificDetails;
 }

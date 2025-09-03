@@ -118,6 +118,8 @@ export async function getThemes(): Promise<Theme[]> {
   return response.data;
 }
 
+
+
 /**
  * Creates a new draft invitation for a user.
  * @param themeId The ID of the theme being used.
@@ -166,7 +168,7 @@ export async function getInvitationById(
   jwt: string,
 ): Promise<Invitation> {
   // We add `publicationState=preview` to include draft entries in the result.
-  const query = `/api/invitations/${id}?populate=theme&publicationState=preview`;
+  const query = `/api/invitations/${id}?&publicationState=preview&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate]=*&populate=theme`;
   const response = await fetchApi<StrapiSingleResponse<Invitation>>(query, {
     method: "GET",
     headers: { Authorization: `Bearer ${jwt}` },

@@ -1,0 +1,169 @@
+{
+  "invitation": {
+    "id": 5,
+    "documentId": "pyjofaf8yzr0f3twhpznl74h",
+    "invitationTitle": "Daffa & Afifa",
+    "invitationUrl": "daffa-afifa",
+    "invitationType": "Wedding",
+    "eventDate": "2026-09-02",
+    "invitationStatus": "draft",
+    "content": {},
+    "createdAt": "2025-09-01T18:20:34.777Z",
+    "updatedAt": "2025-09-03T18:51:00.073Z",
+    "publishedAt": "2025-09-03T18:51:00.096Z",
+    "typeSpecificDetails": [
+      {
+        "__component": "invitation-details.wedding-details",
+        "id": 3,
+        "additionalNote": "Please join us for this joyous celebration of love. Dress code: Formal attire. Light refreshments will be served after the ceremony.",
+        "coverSection": {
+          "id": 3,
+          "title": "Daffa & Afifa",
+          "subtitle": "Together Forever",
+          "header": "The wedding of",
+          "subheader": "request the honor of your presence"
+        },
+        "openingSection": {
+          "id": 3,
+          "quotes": "Love is not about how many days, months, or years you have been together. Love is about how much you love each other every single day. We are excited to share this special moment with our beloved family and friends.",
+          "decorationUrl": "https://example.com/decoration.png",
+          "imageUrl": "https://example.com/couple-photo.jpg"
+        },
+        "eventDetails": [
+          {
+            "id": 5,
+            "eventName": "Akad Nikah",
+            "datetimeStart": "2026-09-02T02:00:00.000Z",
+            "datetimeEnd": "2026-09-02T04:00:00.000Z",
+            "eventLocation": "Masjid Istiqlal, Jakarta"
+          },
+          {
+            "id": 6,
+            "eventName": "Resepsi Pernikahan",
+            "datetimeStart": "2026-09-02T05:00:00.000Z",
+            "datetimeEnd": "2026-09-02T08:00:00.000Z",
+            "eventLocation": "Grand Ballroom, Hotel Indonesia"
+          }
+        ],
+        "medias": null,
+        "groomDetails": [
+          {
+            "id": 5,
+            "name": "Daffa",
+            "gender": "male",
+            "fullName": "Mohammad Daffa Pratama",
+            "imageUrl": "https://example.com/groom-photo.jpg",
+            "birthOrder": 2,
+            "additionalInfo": "Son of Mr. Ahmad Pratama and Mrs. Siti Nurhaliza. Graduate of Computer Science from University of Indonesia."
+          },
+          {
+            "id": 6,
+            "name": "Afifa",
+            "gender": "female",
+            "fullName": "Afifa Atira Salsabila",
+            "imageUrl": "https://example.com/bride-photo.jpg",
+            "birthOrder": 1,
+            "additionalInfo": "Daughter of Mr. Budi Salsabila and Mrs. Rina Kartika. Graduate of Business Administration from Bandung Institute of Technology."
+          }
+        ]
+      }
+    ],
+    "theme": {
+      "id": 2,
+      "documentId": "ydkdbe7pq1goruiuosgekabh",
+      "themeName": "Wedding Classic",
+      "slug": "wedding-classic",
+      "thumbnailUrl": "https://placehold.co/800x600/F43F5E/FFFFFF?text=Wedding+Classic",
+      "invitationType": "wedding",
+      "createdAt": "2025-09-01T17:47:24.608Z",
+      "updatedAt": "2025-09-01T17:47:25.954Z",
+      "publishedAt": "2025-09-01T17:47:25.959Z",
+      "structure_blueprint": {
+        "sections": [
+          {
+            "id": "cover",
+            "name": "Cover Section",
+            "fields": [
+              {
+                "id": "title",
+                "label": "Wedding Title",
+                "type": "text",
+                "placeholder": "e.g., Daffa & Afifa",
+                "required": true,
+                "inferredFrom": "typeSpecificDetails.coverSection.title"
+              },
+              {
+                "id": "subtitle",
+                "label": "Subtitle",
+                "type": "text",
+                "placeholder": "e.g., Together Forever",
+                "required": false,
+                "inferredFrom": "typeSpecificDetails.coverSection.subtitle"
+              },
+              {
+                "id": "header",
+                "label": "Header Text",
+                "type": "text",
+                "placeholder": "e.g., The wedding of",
+                "required": false,
+                "inferredFrom": "typeSpecificDetails.coverSection.header"
+              },
+              {
+                "id": "subheader",
+                "label": "Subheader Text",
+                "type": "text",
+                "placeholder": "e.g., request the honor of your presence",
+                "required": false,
+                "inferredFrom": "typeSpecificDetails.coverSection.subheader"
+              }
+            ]
+          },
+          {
+            "id": "opening",
+            "name": "Opening Section",
+            "fields": [
+              {
+                "id": "quotes",
+                "label": "Opening Quote or Message",
+                "type": "textarea",
+                "placeholder": "Enter a meaningful quote or personal message for your guests",
+                "required": false,
+                "inferredFrom": "typeSpecificDetails.openingSection.quotes"
+              },
+              {
+                "id": "decorationUrl",
+                "label": "Decoration Image URL",
+                "type": "url",
+                "placeholder": "https://example.com/decoration.png",
+                "required": false,
+                "inferredFrom": "typeSpecificDetails.openingSection.decorationUrl"
+              },
+              {
+                "id": "imageUrl",
+                "label": "Opening Section Image URL",
+                "type": "url",
+                "placeholder": "https://example.com/opening-image.jpg",
+                "required": false,
+                "inferredFrom": "typeSpecificDetails.openingSection.imageUrl"
+              }
+            ]
+          },
+          {
+            "id": "additional",
+            "name": "Additional Information",
+            "fields": [
+              {
+                "id": "additionalNote",
+                "label": "Additional Notes",
+                "type": "textarea",
+                "placeholder": "Any additional information for your guests",
+                "required": false,
+                "inferredFrom": "typeSpecificDetails.additionalNote"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
