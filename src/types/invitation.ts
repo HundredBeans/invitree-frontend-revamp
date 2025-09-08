@@ -78,8 +78,10 @@ export interface CreateInvitationData {
   invitationTitle: string;
   invitationUrl: string;
   invitationType: "Wedding" | "Event";
+  eventDate?: string;
   theme: number; // Theme ID
   owner: number; // User ID
+  typeSpecificDetails?: any[]; // Default data based on invitation type
 }
 
 // For updating invitations

@@ -12,6 +12,7 @@ export interface ThemeField {
     | "date"
     | "datetime-local";
   placeholder?: string;
+  defaultValue?: string;
   required?: boolean;
   inferredFrom?: string;
 }
@@ -31,6 +32,7 @@ export interface Theme {
   themeName: string;
   slug: string;
   thumbnailUrl: string;
+  invitationType: "wedding" | "event";
   structure_blueprint: StructureBlueprint;
   createdAt: string;
   updatedAt: string;

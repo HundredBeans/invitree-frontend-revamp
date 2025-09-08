@@ -17,6 +17,7 @@ import type {
   UpdateInvitationData,
 } from "@/types/invitation";
 import type { Theme } from "@/types/theme";
+import { getDefaultInvitationData } from "@/lib/invitation-defaults";
 
 // Get the Strapi URL from the environment variables, with a fallback for safety.
 const STRAPI_URL =
@@ -120,24 +121,33 @@ export async function getThemes(): Promise<Theme[]> {
 
 
 
+
+
 /**
  * Creates a new draft invitation for a user.
  * @param themeId The ID of the theme being used.
  * @param userId The ID of the owner.
  * @param jwt The user's JSON Web Token for authentication.
+ * @param invitationType The type of invitation to create (defaults to "Wedding").
  * @returns The newly created invitation object.
  */
 export async function createInvitation(
   themeId: number,
   userId: number,
   jwt: string,
+  invitationType: "Wedding" | "Event" = "Wedding",
 ): Promise<Invitation> {
+  const timestamp = Date.now();
+  const defaultData = getDefaultInvitationData(invitationType);
+
   const createData: CreateInvitationData = {
-    invitationTitle: "Untitled Invitation",
-    invitationUrl: `draft-${Date.now()}`, // Temporary unique URL
-    invitationType: "Event", // Default type, can be improved later
+    invitationTitle: defaultData.invitationTitle,
+    invitationUrl: `${invitationType.toLowerCase()}-${timestamp}`,
+    invitationType: invitationType,
+    eventDate: defaultData.eventDate,
     theme: themeId,
     owner: userId,
+    typeSpecificDetails: defaultData.typeSpecificDetails,
   };
 
   const response = await fetchApi<StrapiSingleResponse<Invitation>>(

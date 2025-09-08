@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
-import { WeddingClassicTheme } from "@/themes/wedding-classic-theme";
+import { renderThemeComponent, isThemeAvailable } from "@/themes";
 import { Monitor, Smartphone, Tablet } from "lucide-react";
 import type { Invitation, InvitationContent } from "@/types/invitation";
 
@@ -227,17 +227,17 @@ export function InvitationPreview({
                 )}
 
                 {/* Theme-based content sections */}
-                {invitation.invitationType === "Wedding" && weddingDetails && invitation.theme?.slug === "wedding-classic" ? (
+                {invitation.invitationType === "Wedding" && weddingDetails && invitation.theme?.slug && isThemeAvailable(invitation.theme.slug) ? (
                   // Use the dedicated wedding theme component for better preview
                   <div className={viewport === "desktop" ? "border rounded-lg overflow-hidden" : "overflow-hidden"}>
-                    <WeddingClassicTheme
-                      invitation={invitation}
-                      formData={formData}
-                      invitationTitle={invitationTitle}
-                      invitationUrl={invitationUrl}
-                      isEditable={isEditable}
-                      onFieldClick={onFieldClick}
-                    />
+                    {renderThemeComponent(invitation.theme.slug, {
+                      invitation,
+                      formData,
+                      invitationTitle,
+                      invitationUrl,
+                      isEditable,
+                      onFieldClick
+                    })}
                   </div>
                 ) : (
                   // Use simplified preview for all other cases

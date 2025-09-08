@@ -1,44 +1,44 @@
 {
   "invitation": {
-    "id": 5,
-    "documentId": "pyjofaf8yzr0f3twhpznl74h",
+    "id": 6,
+    "documentId": "ornamental_wedding_theme_sample",
     "invitationTitle": "Bride & Groom",
     "invitationUrl": "bride-groom",
     "invitationType": "Wedding",
     "eventDate": "2025-12-31",
     "invitationStatus": "draft",
     "content": {},
-    "createdAt": "2025-09-01T18:20:34.777Z",
-    "updatedAt": "2025-09-03T18:51:00.073Z",
-    "publishedAt": "2025-09-03T18:51:00.096Z",
+    "createdAt": "2025-09-08T12:00:00.000Z",
+    "updatedAt": "2025-09-08T12:00:00.000Z",
+    "publishedAt": "2025-09-08T12:00:00.000Z",
     "typeSpecificDetails": [
       {
         "__component": "invitation-details.wedding-details",
-        "id": 3,
-        "additionalNote": "Please join us for this joyous celebration of love. Your presence is the greatest gift we could ask for as we begin our new journey together.",
+        "id": 4,
+        "additionalNote": "We request the honor of your presence at our wedding celebration. Please join us for this joyous occasion as we begin our journey together as husband and wife.",
         "coverSection": {
-          "id": 3,
+          "id": 4,
           "title": "Bride & Groom",
           "subtitle": "Together Forever",
-          "header": "The wedding of",
-          "subheader": "request the honor of your presence"
+          "header": "The Wedding of",
+          "subheader": "request the pleasure of your company"
         },
         "openingSection": {
-          "id": 3,
-          "quotes": "Love is not about how many days, months, or years you have been together. Love is about how much you love each other every single day. We are excited to share this special moment with our beloved family and friends.",
-          "decorationUrl": "https://via.placeholder.com/200x100/F43F5E/FFFFFF?text=Decoration",
+          "id": 4,
+          "quotes": "Love is composed of a single soul inhabiting two bodies. We are excited to share this special moment with our beloved family and friends as we unite in marriage.",
+          "decorationUrl": "https://via.placeholder.com/200x100/F59E0B/FFFFFF?text=Decoration",
           "imageUrl": "https://via.placeholder.com/600x400/F8FAFC/6B7280?text=Couple+Photo"
         },
         "eventDetails": [
           {
-            "id": 5,
+            "id": 7,
             "eventName": "Wedding Ceremony",
             "datetimeStart": "2025-12-31T04:00:00.000Z",
             "datetimeEnd": "2025-12-31T06:00:00.000Z",
             "eventLocation": "Main Wedding Venue"
           },
           {
-            "id": 6,
+            "id": 8,
             "eventName": "Wedding Reception",
             "datetimeStart": "2025-12-31T07:00:00.000Z",
             "datetimeEnd": "2025-12-31T10:00:00.000Z",
@@ -48,7 +48,7 @@
         "medias": null,
         "groomDetails": [
           {
-            "id": 5,
+            "id": 7,
             "name": "Groom Name",
             "gender": "male",
             "fullName": "Groom Full Name",
@@ -57,7 +57,7 @@
             "additionalInfo": "Son of Mr. Father Name and Mrs. Mother Name. Brief description about the groom's background, education, or profession."
           },
           {
-            "id": 6,
+            "id": 8,
             "name": "Bride Name",
             "gender": "female",
             "fullName": "Bride Full Name",
@@ -69,15 +69,15 @@
       }
     ],
     "theme": {
-      "id": 2,
-      "documentId": "ydkdbe7pq1goruiuosgekabh",
-      "themeName": "Wedding Classic",
-      "slug": "wedding-classic",
-      "thumbnailUrl": "https://placehold.co/800x600/F43F5E/FFFFFF?text=Wedding+Classic",
+      "id": 3,
+      "documentId": "wedding_ornamental_theme_doc",
+      "themeName": "Wedding Ornamental",
+      "slug": "wedding-ornamental",
+      "thumbnailUrl": "https://placehold.co/800x600/F59E0B/FFFFFF?text=Wedding+Ornamental",
       "invitationType": "wedding",
-      "createdAt": "2025-09-01T17:47:24.608Z",
-      "updatedAt": "2025-09-01T17:47:25.954Z",
-      "publishedAt": "2025-09-01T17:47:25.959Z",
+      "createdAt": "2025-09-08T12:00:00.000Z",
+      "updatedAt": "2025-09-08T12:00:00.000Z",
+      "publishedAt": "2025-09-08T12:00:00.000Z",
       "structure_blueprint": {
         "sections": [
           {
@@ -106,8 +106,8 @@
                 "id": "header",
                 "label": "Header Text",
                 "type": "text",
-                "placeholder": "e.g., The wedding of",
-                "defaultValue": "The wedding of",
+                "placeholder": "e.g., The Wedding of",
+                "defaultValue": "The Wedding of",
                 "required": false,
                 "inferredFrom": "typeSpecificDetails.coverSection.header"
               },
@@ -115,8 +115,8 @@
                 "id": "subheader",
                 "label": "Subheader Text",
                 "type": "text",
-                "placeholder": "e.g., request the honor of your presence",
-                "defaultValue": "request the honor of your presence",
+                "placeholder": "e.g., request the pleasure of your company",
+                "defaultValue": "request the pleasure of your company",
                 "required": false,
                 "inferredFrom": "typeSpecificDetails.coverSection.subheader"
               }
@@ -131,7 +131,7 @@
                 "label": "Opening Quote or Message",
                 "type": "textarea",
                 "placeholder": "Enter a meaningful quote or personal message for your guests",
-                "defaultValue": "Love is not about how many days, months, or years you have been together. Love is about how much you love each other every single day. We are excited to share this special moment with our beloved family and friends.",
+                "defaultValue": "Love is composed of a single soul inhabiting two bodies. We are excited to share this special moment with our beloved family and friends as we unite in marriage.",
                 "required": false,
                 "inferredFrom": "typeSpecificDetails.openingSection.quotes"
               },
@@ -139,8 +139,8 @@
                 "id": "decorationUrl",
                 "label": "Decoration Image URL",
                 "type": "url",
-                "placeholder": "https://via.placeholder.com/200x100/F43F5E/FFFFFF?text=Decoration",
-                "defaultValue": "https://via.placeholder.com/200x100/F43F5E/FFFFFF?text=Decoration",
+                "placeholder": "https://via.placeholder.com/200x100/F59E0B/FFFFFF?text=Decoration",
+                "defaultValue": "https://via.placeholder.com/200x100/F59E0B/FFFFFF?text=Decoration",
                 "required": false,
                 "inferredFrom": "typeSpecificDetails.openingSection.decorationUrl"
               },
@@ -164,7 +164,7 @@
                 "label": "Additional Notes",
                 "type": "textarea",
                 "placeholder": "Any additional information for your guests",
-                "defaultValue": "Please join us for this joyous celebration of love. Your presence is the greatest gift we could ask for as we begin our new journey together.",
+                "defaultValue": "We request the honor of your presence at our wedding celebration. Please join us for this joyous occasion as we begin our journey together as husband and wife.",
                 "required": false,
                 "inferredFrom": "typeSpecificDetails.additionalNote"
               }

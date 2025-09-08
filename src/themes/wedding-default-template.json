@@ -1,0 +1,182 @@
+{
+  "wedding": {
+    "invitation": {
+      "invitationTitle": "Bride & Groom",
+      "invitationUrl": "bride-groom",
+      "invitationType": "Wedding",
+      "eventDate": "2025-12-31",
+      "invitationStatus": "draft"
+    },
+    "typeSpecificDetails": {
+      "__component": "invitation-details.wedding-details",
+      "additionalNote": "Please join us for this joyous celebration of love. Your presence is the greatest gift we could ask for as we begin our new journey together.",
+      "coverSection": {
+        "title": "Bride & Groom",
+        "subtitle": "Together Forever",
+        "header": "The Wedding of",
+        "subheader": "request the honor of your presence"
+      },
+      "openingSection": {
+        "quotes": "Love is not about how many days, months, or years you have been together. Love is about how much you love each other every single day. We are excited to share this special moment with our beloved family and friends.",
+        "decorationUrl": "https://via.placeholder.com/200x100/F43F5E/FFFFFF?text=Decoration",
+        "imageUrl": "https://via.placeholder.com/600x400/F8FAFC/6B7280?text=Couple+Photo"
+      },
+      "eventDetails": [
+        {
+          "eventName": "Wedding Ceremony",
+          "datetimeStart": "2025-12-31T04:00:00.000Z",
+          "datetimeEnd": "2025-12-31T06:00:00.000Z",
+          "eventLocation": "Main Wedding Venue"
+        },
+        {
+          "eventName": "Wedding Reception",
+          "datetimeStart": "2025-12-31T07:00:00.000Z",
+          "datetimeEnd": "2025-12-31T10:00:00.000Z",
+          "eventLocation": "Reception Hall"
+        }
+      ],
+      "groomDetails": [
+        {
+          "name": "Groom Name",
+          "gender": "male",
+          "fullName": "Groom Full Name",
+          "imageUrl": "https://via.placeholder.com/300x300/3B82F6/FFFFFF?text=Groom+Photo",
+          "birthOrder": 1,
+          "additionalInfo": "Son of Mr. Father Name and Mrs. Mother Name. Brief description about the groom's background, education, or profession."
+        },
+        {
+          "name": "Bride Name",
+          "gender": "female",
+          "fullName": "Bride Full Name",
+          "imageUrl": "https://via.placeholder.com/300x300/EC4899/FFFFFF?text=Bride+Photo",
+          "birthOrder": 1,
+          "additionalInfo": "Daughter of Mr. Father Name and Mrs. Mother Name. Brief description about the bride's background, education, or profession."
+        }
+      ]
+    }
+  },
+  "birthday": {
+    "invitation": {
+      "invitationTitle": "Birthday Celebration",
+      "invitationUrl": "birthday-celebration",
+      "invitationType": "Birthday",
+      "eventDate": "2025-12-31",
+      "invitationStatus": "draft"
+    },
+    "typeSpecificDetails": {
+      "__component": "invitation-details.birthday-details",
+      "additionalNote": "Join us for a special birthday celebration! Come and help us make this day memorable with your presence.",
+      "coverSection": {
+        "title": "Birthday Celebration",
+        "subtitle": "Another Year of Joy",
+        "header": "You're Invited to",
+        "subheader": "celebrate with us"
+      },
+      "openingSection": {
+        "quotes": "Birthdays are nature's way of telling us to eat more cake! Join us for a day filled with laughter, joy, and wonderful memories.",
+        "decorationUrl": "https://via.placeholder.com/200x100/10B981/FFFFFF?text=Birthday+Decoration",
+        "imageUrl": "https://via.placeholder.com/600x400/F8FAFC/6B7280?text=Birthday+Photo"
+      },
+      "eventDetails": [
+        {
+          "eventName": "Birthday Party",
+          "datetimeStart": "2025-12-31T06:00:00.000Z",
+          "datetimeEnd": "2025-12-31T10:00:00.000Z",
+          "eventLocation": "Party Venue"
+        }
+      ],
+      "celebrantDetails": {
+        "name": "Celebrant Name",
+        "fullName": "Celebrant Full Name",
+        "imageUrl": "https://via.placeholder.com/300x300/10B981/FFFFFF?text=Celebrant+Photo",
+        "age": 25,
+        "additionalInfo": "Brief description about the birthday celebrant and what makes this birthday special."
+      }
+    }
+  },
+  "graduation": {
+    "invitation": {
+      "invitationTitle": "Graduation Ceremony",
+      "invitationUrl": "graduation-ceremony",
+      "invitationType": "Graduation",
+      "eventDate": "2025-12-31",
+      "invitationStatus": "draft"
+    },
+    "typeSpecificDetails": {
+      "__component": "invitation-details.graduation-details",
+      "additionalNote": "Please join us as we celebrate this academic milestone. Your presence would make this achievement even more meaningful.",
+      "coverSection": {
+        "title": "Graduation Ceremony",
+        "subtitle": "Academic Achievement",
+        "header": "Celebrating the Graduation of",
+        "subheader": "your presence is requested"
+      },
+      "openingSection": {
+        "quotes": "Education is the most powerful weapon which you can use to change the world. Today we celebrate years of hard work and dedication.",
+        "decorationUrl": "https://via.placeholder.com/200x100/7C3AED/FFFFFF?text=Graduation+Decoration",
+        "imageUrl": "https://via.placeholder.com/600x400/F8FAFC/6B7280?text=Graduate+Photo"
+      },
+      "eventDetails": [
+        {
+          "eventName": "Graduation Ceremony",
+          "datetimeStart": "2025-12-31T04:00:00.000Z",
+          "datetimeEnd": "2025-12-31T07:00:00.000Z",
+          "eventLocation": "University Auditorium"
+        },
+        {
+          "eventName": "Celebration Reception",
+          "datetimeStart": "2025-12-31T08:00:00.000Z",
+          "datetimeEnd": "2025-12-31T11:00:00.000Z",
+          "eventLocation": "Reception Hall"
+        }
+      ],
+      "graduateDetails": {
+        "name": "Graduate Name",
+        "fullName": "Graduate Full Name",
+        "imageUrl": "https://via.placeholder.com/300x300/7C3AED/FFFFFF?text=Graduate+Photo",
+        "degree": "Bachelor of Science",
+        "institution": "University Name",
+        "additionalInfo": "Brief description about the graduate's academic journey and future plans."
+      }
+    }
+  },
+  "corporate": {
+    "invitation": {
+      "invitationTitle": "Corporate Event",
+      "invitationUrl": "corporate-event",
+      "invitationType": "Corporate",
+      "eventDate": "2025-12-31",
+      "invitationStatus": "draft"
+    },
+    "typeSpecificDetails": {
+      "__component": "invitation-details.corporate-details",
+      "additionalNote": "We cordially invite you to join us for this important corporate event. Your participation is valuable to us.",
+      "coverSection": {
+        "title": "Corporate Event",
+        "subtitle": "Professional Gathering",
+        "header": "You are invited to",
+        "subheader": "join us for this special occasion"
+      },
+      "openingSection": {
+        "quotes": "Success is best when it's shared. Join us as we celebrate our achievements and look forward to future opportunities together.",
+        "decorationUrl": "https://via.placeholder.com/200x100/1F2937/FFFFFF?text=Corporate+Logo",
+        "imageUrl": "https://via.placeholder.com/600x400/F8FAFC/6B7280?text=Corporate+Event"
+      },
+      "eventDetails": [
+        {
+          "eventName": "Main Event",
+          "datetimeStart": "2025-12-31T05:00:00.000Z",
+          "datetimeEnd": "2025-12-31T09:00:00.000Z",
+          "eventLocation": "Conference Center"
+        }
+      ],
+      "organizerDetails": {
+        "companyName": "Company Name",
+        "contactPerson": "Event Organizer",
+        "contactEmail": "contact@company.com",
+        "contactPhone": "+1234567890",
+        "additionalInfo": "Brief description about the company and the purpose of this corporate event."
+      }
+    }
+  }
+}
