@@ -87,5 +87,7 @@ export interface UpdateInvitationData {
   invitationTitle?: string;
   invitationUrl?: string;
   content?: InvitationContent;
+  invitationStatus?: "draft" | "published" | "archived";
+  eventDate?: string | null; // Dates are often strings in JSON
   typeSpecificDetails?: TypeSpecificDetails;
 }

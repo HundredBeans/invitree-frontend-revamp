@@ -70,11 +70,20 @@ export function WeddingClassicTheme({
 
   const groomDetails = weddingDetails.groomDetails?.find(d => d.gender === "male");
   const brideDetails = weddingDetails.groomDetails?.find(d => d.gender === "female");
-  const akadEvent = weddingDetails.eventDetails?.find(e => e.eventName.toLowerCase().includes("akad"));
-  const resepsiEvent = weddingDetails.eventDetails?.find(e => 
-    e.eventName.toLowerCase().includes("resepsi") || 
-    e.eventName.toLowerCase().includes("reception")
+  const akadEvent = weddingDetails.eventDetails?.find(e => e.eventName?.toLowerCase().includes("akad"));
+  const resepsiEvent = weddingDetails.eventDetails?.find(e =>
+    e.eventName?.toLowerCase().includes("resepsi") ||
+    e.eventName?.toLowerCase().includes("reception")
   );
+
+  // Get array indices for click-to-edit
+  const groomIndex = weddingDetails.groomDetails?.findIndex(d => d.gender === "male") ?? -1;
+  const brideIndex = weddingDetails.groomDetails?.findIndex(d => d.gender === "female") ?? -1;
+  const akadIndex = weddingDetails.eventDetails?.findIndex(e => e.eventName?.toLowerCase().includes("akad")) ?? -1;
+  const resepsiIndex = weddingDetails.eventDetails?.findIndex(e =>
+    e.eventName?.toLowerCase().includes("resepsi") ||
+    e.eventName?.toLowerCase().includes("reception")
+  ) ?? -1;
 
   const formatDateTime = (dateString: string) => {
     try {
@@ -227,14 +236,14 @@ export function WeddingClassicTheme({
                     )}
                     {createEditableElement(
                       "groomDetails",
-                      "groomName",
+                      `${groomIndex}.name`,
                       groomDetails.name,
                       "text-3xl font-serif text-gray-800 mb-2"
                     )}
                     {groomDetails.fullName &&
                       createEditableElement(
                         "groomDetails",
-                        "groomFullName",
+                        `${groomIndex}.fullName`,
                         groomDetails.fullName,
                         "text-xl text-gray-600 mb-4"
                       )
@@ -270,14 +279,14 @@ export function WeddingClassicTheme({
                     )}
                     {createEditableElement(
                       "groomDetails",
-                      "brideName",
+                      `${brideIndex}.name`,
                       brideDetails.name,
                       "text-3xl font-serif text-gray-800 mb-2"
                     )}
                     {brideDetails.fullName &&
                       createEditableElement(
                         "groomDetails",
-                        "brideFullName",
+                        `${brideIndex}.fullName`,
                         brideDetails.fullName,
                         "text-xl text-gray-600 mb-4"
                       )
@@ -322,7 +331,7 @@ export function WeddingClassicTheme({
                     </div>
                     {createEditableElement(
                       "eventDetails",
-                      "akadEventName",
+                      `${akadIndex}.eventName`,
                       akadEvent.eventName,
                       "text-2xl font-serif text-gray-800 mb-4 capitalize"
                     )}
@@ -345,7 +354,7 @@ export function WeddingClassicTheme({
                         </svg>
                         {createEditableElement(
                           "eventDetails",
-                          "akadLocation",
+                          `${akadIndex}.eventLocation`,
                           akadEvent.eventLocation,
                           "font-medium"
                         )}
@@ -366,7 +375,7 @@ export function WeddingClassicTheme({
                     </div>
                     {createEditableElement(
                       "eventDetails",
-                      "resepsiEventName",
+                      `${resepsiIndex}.eventName`,
                       resepsiEvent.eventName,
                       "text-2xl font-serif text-gray-800 mb-4 capitalize"
                     )}
@@ -389,7 +398,7 @@ export function WeddingClassicTheme({
                         </svg>
                         {createEditableElement(
                           "eventDetails",
-                          "resepsiLocation",
+                          `${resepsiIndex}.eventLocation`,
                           resepsiEvent.eventLocation,
                           "font-medium"
                         )}

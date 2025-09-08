@@ -9,30 +9,20 @@ import {
   CardContent,
   CardHeader,
   FormInput,
-  FormTextarea,
 } from "@/components/ui";
 import { InvitationPreview } from "@/components/invitation-preview";
 import { useErrorHandler } from "@/hooks/use-error-handler";
 import { getInvitationById, updateInvitation } from "@/lib/strapi";
-import {
-  extractFormDataFromTypeSpecificDetails,
-  convertFormDataToTypeSpecificDetails
-} from "@/lib/theme-helpers";
 import type { Invitation, InvitationContent } from "@/types/invitation";
+import { FormRenderer } from "@/components/form-renderer";
+import { weddingFormSections } from "@/config/wedding-form-config";
 import {
   Edit3,
   Save,
   X,
   ChevronDown,
   ChevronRight,
-  Heart,
-  MessageSquare,
-  Users,
-  Calendar,
-  Info
 } from "lucide-react";
-
-type EditorSection = "basic" | "cover" | "opening" | "couple" | "events" | "additional";
 
 export default function InvitationEditorPage() {
   const { data: session, status: sessionStatus } = useSession();
@@ -49,12 +39,12 @@ export default function InvitationEditorPage() {
   const [invitationTitle, setInvitationTitle] = useState("");
   const [invitationUrl, setInvitationUrl] = useState("");
   const [formData, setFormData] = useState<InvitationContent>({}); // For the dynamic 'content'
+  const [typeSpecificDetails, setTypeSpecificDetails] = useState<any>(null); // Direct API structure
 
   // Floating editor panel state
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<EditorSection>("basic");
-  const [expandedSections, setExpandedSections] = useState<Set<EditorSection>>(new Set(["basic"]));
-  const [pendingFieldFocus, setPendingFieldFocus] = useState<{section: string, field: string} | null>(null);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["basic"]));
+  const [pendingFieldFocus, setPendingFieldFocus] = useState<{section: string, field: string, arrayIndex?: number} | null>(null);
 
   // Effect to handle field focusing after section expansion
   useEffect(() => {
@@ -110,8 +100,24 @@ export default function InvitationEditorPage() {
     }
   }, [isEditorOpen]);
 
+  // Effect to handle field focusing
+  useEffect(() => {
+    if (pendingFieldFocus && isEditorOpen) {
+      // Clear the pending focus after a short delay to allow the form to render
+      const timer = setTimeout(() => {
+        setPendingFieldFocus(null);
+      }, 500); // Increased delay to ensure form is rendered
+      return () => clearTimeout(timer);
+    }
+  }, [isEditorOpen, pendingFieldFocus]);
+
+  // Simple helper to get wedding details
+  const getWeddingDetails = () => {
+    return invitation?.typeSpecificDetails?.[0] as any;
+  };
+
   // Helper functions for floating editor
-  const toggleSection = (section: EditorSection) => {
+  const toggleSection = (section: string) => {
     const newExpanded = new Set(expandedSections);
     if (newExpanded.has(section)) {
       newExpanded.delete(section);
@@ -121,39 +127,17 @@ export default function InvitationEditorPage() {
     setExpandedSections(newExpanded);
   };
 
-  const getSectionIcon = (section: EditorSection) => {
-    switch (section) {
-      case "basic": return Edit3;
-      case "cover": return Heart;
-      case "opening": return MessageSquare;
-      case "couple": return Users;
-      case "events": return Calendar;
-      case "additional": return Info;
-      default: return Edit3;
-    }
-  };
-
-  const getSectionTitle = (section: EditorSection) => {
-    switch (section) {
-      case "basic": return "Basic Information";
-      case "cover": return "Cover Section";
-      case "opening": return "Opening Section";
-      case "couple": return "Couple Details";
-      case "events": return "Event Details";
-      case "additional": return "Additional Information";
-      default: return "Section";
-    }
-  };
-
   // Handle field clicks from the preview
   const handleFieldClick = (section: string, field: string) => {
-    // Map section names to EditorSection types
-    const getSectionKey = (sectionName: string): EditorSection => {
+    console.log("Field clicked:", { section, field });
+
+    // Map section names from theme to form config section IDs
+    const getSectionKey = (sectionName: string): string => {
       switch (sectionName) {
-        case "cover": return "cover";
-        case "opening": return "opening";
-        case "groomDetails": return "couple";
-        case "eventDetails": return "events";
+        case "cover": return "coverSection";
+        case "opening": return "openingSection";
+        case "groomDetails": return "groomDetails";
+        case "eventDetails": return "eventDetails";
         case "additional": return "additional";
         default: return "basic";
       }
@@ -161,12 +145,30 @@ export default function InvitationEditorPage() {
 
     // Expand the relevant section
     const sectionKey = getSectionKey(section);
+    console.log("Mapped section key:", sectionKey);
+
     const newExpanded = new Set(expandedSections);
     newExpanded.add(sectionKey);
     setExpandedSections(newExpanded);
 
-    // Set pending field focus
-    setPendingFieldFocus({ section, field });
+    // For array fields, we need to pass both the index and field name
+    // e.g., "0.name" -> { arrayIndex: 0, field: "name" }
+    let arrayIndex = null;
+    let actualField = field;
+
+    if (field.includes('.')) {
+      const parts = field.split('.');
+      arrayIndex = parseInt(parts[0]);
+      actualField = parts[1];
+    }
+
+    // Set pending field focus with the mapped section name, field, and array index
+    setPendingFieldFocus({
+      section: sectionKey,
+      field: actualField,
+      arrayIndex: arrayIndex ?? undefined
+    });
+    console.log("Set pending field focus:", { section: sectionKey, field: actualField, arrayIndex });
 
     // Open the editor panel
     setIsEditorOpen(true);
@@ -187,16 +189,11 @@ export default function InvitationEditorPage() {
       setInvitationTitle(data.invitationTitle);
       setInvitationUrl(data.invitationUrl);
 
-      let initialFormData = data.content || {};
+      // Initialize with existing typeSpecificDetails
+      setTypeSpecificDetails(data.typeSpecificDetails);
 
-      // If we have typeSpecificDetails, extract form data from it
-      if (data.typeSpecificDetails && data.typeSpecificDetails.length > 0) {
-        const extractedFormData = extractFormDataFromTypeSpecificDetails(data.typeSpecificDetails);
-        // Use typeSpecificDetails as the primary source
-        initialFormData = extractedFormData;
-      }
-
-      setFormData(initialFormData);
+      // Initialize empty form data - we'll update typeSpecificDetails directly
+      setFormData({});
     } catch (err: unknown) {
       console.error(err);
       handleError(
@@ -216,18 +213,30 @@ export default function InvitationEditorPage() {
     }
   }, [sessionStatus, fetchInvitationData, router]);
 
-  const handleInputChange = (
-    sectionId: string,
-    fieldId: string,
-    value: string,
-  ) => {
-    setFormData((prevData: InvitationContent) => ({
-      ...prevData,
-      [sectionId]: {
-        ...prevData[sectionId],
-        [fieldId]: value,
-      },
-    }));
+  // Simple update function that works directly with API structure
+  const updateField = (path: string, value: any) => {
+    if (!invitation?.typeSpecificDetails?.[0]) return;
+
+    setInvitation(prev => {
+      if (!prev) return prev;
+      const updated = { ...prev };
+      const weddingDetails = updated.typeSpecificDetails![0] as any;
+
+      // Simple path-based updates
+      const keys = path.split('.');
+      let current = weddingDetails;
+
+      // Navigate to the parent object
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) current[keys[i]] = {};
+        current = current[keys[i]];
+      }
+
+      // Set the final value
+      current[keys[keys.length - 1]] = value || null;
+
+      return updated;
+    });
   };
 
   const handleSave = async () => {
@@ -238,18 +247,11 @@ export default function InvitationEditorPage() {
       const jwt = session.user?.jwt;
       if (!jwt) throw new Error("Authentication token not found.");
 
-      // Convert form data to typeSpecificDetails structure
-      const typeSpecificDetails = convertFormDataToTypeSpecificDetails(
-        formData,
-        invitation?.typeSpecificDetails
-      );
-
-      // --- NEW: Combine all data for the update payload ---
+      // Use the updated typeSpecificDetails directly - no conversion needed
       const updatePayload = {
         invitationTitle,
         invitationUrl,
-        content: formData,
-        typeSpecificDetails,
+        typeSpecificDetails: typeSpecificDetails || invitation?.typeSpecificDetails,
       };
 
       await updateInvitation(documentId, updatePayload, jwt);
@@ -372,347 +374,14 @@ export default function InvitationEditorPage() {
 
               {/* Wedding-specific sections */}
               {weddingDetails && (
-                <>
-                  {/* Cover Section */}
-                  <div className="border rounded-lg">
-                    <button
-                      onClick={() => toggleSection("cover")}
-                      className="w-full flex items-center justify-between p-3 text-left hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Heart className="h-4 w-4" />
-                        <span className="font-medium">Cover Section</span>
-                      </div>
-                      {expandedSections.has("cover") ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </button>
-                    {expandedSections.has("cover") && (
-                      <div className="p-3 border-t space-y-4">
-                        <FormInput
-                          id="cover-title"
-                          label="Wedding Title"
-                          placeholder="e.g., Daffa & Afifa"
-                          value={formData.cover?.title || ""}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            handleInputChange("cover", "title", e.target.value)
-                          }
-                        />
-                        <FormInput
-                          id="cover-subtitle"
-                          label="Subtitle"
-                          placeholder="e.g., Together Forever"
-                          value={formData.cover?.subtitle || ""}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            handleInputChange("cover", "subtitle", e.target.value)
-                          }
-                        />
-                        <FormInput
-                          id="cover-header"
-                          label="Header Text"
-                          placeholder="e.g., The wedding of"
-                          value={formData.cover?.header || ""}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            handleInputChange("cover", "header", e.target.value)
-                          }
-                        />
-                        <FormInput
-                          id="cover-subheader"
-                          label="Subheader Text"
-                          placeholder="e.g., request the honor of your presence"
-                          value={formData.cover?.subheader || ""}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            handleInputChange("cover", "subheader", e.target.value)
-                          }
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Opening Section */}
-                  <div className="border rounded-lg">
-                    <button
-                      onClick={() => toggleSection("opening")}
-                      className="w-full flex items-center justify-between p-3 text-left hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4" />
-                        <span className="font-medium">Opening Section</span>
-                      </div>
-                      {expandedSections.has("opening") ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </button>
-                    {expandedSections.has("opening") && (
-                      <div className="p-3 border-t space-y-4">
-                        <FormTextarea
-                          id="opening-quotes"
-                          label="Opening Quote or Message"
-                          placeholder="Enter a meaningful quote or personal message for your guests"
-                          rows={4}
-                          value={formData.opening?.quotes || ""}
-                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                            handleInputChange("opening", "quotes", e.target.value)
-                          }
-                        />
-                        <FormInput
-                          type="url"
-                          id="opening-decorationUrl"
-                          label="Decoration Image URL"
-                          placeholder="https://example.com/decoration.png"
-                          value={formData.opening?.decorationUrl || ""}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            handleInputChange("opening", "decorationUrl", e.target.value)
-                          }
-                        />
-                        <FormInput
-                          type="url"
-                          id="opening-imageUrl"
-                          label="Opening Section Image URL"
-                          placeholder="https://example.com/opening-image.jpg"
-                          value={formData.opening?.imageUrl || ""}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            handleInputChange("opening", "imageUrl", e.target.value)
-                          }
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Couple Details Section */}
-                  <div className="border rounded-lg">
-                    <button
-                      onClick={() => toggleSection("couple")}
-                      className="w-full flex items-center justify-between p-3 text-left hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        <span className="font-medium">Couple Details</span>
-                      </div>
-                      {expandedSections.has("couple") ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </button>
-                    {expandedSections.has("couple") && (
-                      <div className="p-3 border-t space-y-6">
-                        {/* Groom Details */}
-                        <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-3">Groom</h4>
-                          <div className="space-y-3">
-                            <FormInput
-                              id="groomDetails-groomName"
-                              label="Groom's Name"
-                              placeholder="e.g., Daffa"
-                              value={formData.groomDetails?.groomName || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("groomDetails", "groomName", e.target.value)
-                              }
-                            />
-                            <FormInput
-                              id="groomDetails-groomFullName"
-                              label="Groom's Full Name"
-                              placeholder="e.g., Mohammad Daffa"
-                              value={formData.groomDetails?.groomFullName || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("groomDetails", "groomFullName", e.target.value)
-                              }
-                            />
-                            <FormInput
-                              type="url"
-                              id="groomDetails-groomImageUrl"
-                              label="Groom's Photo URL"
-                              placeholder="https://example.com/groom-photo.jpg"
-                              value={formData.groomDetails?.groomImageUrl || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("groomDetails", "groomImageUrl", e.target.value)
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        {/* Bride Details */}
-                        <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-3">Bride</h4>
-                          <div className="space-y-3">
-                            <FormInput
-                              id="groomDetails-brideName"
-                              label="Bride's Name"
-                              placeholder="e.g., Afifa"
-                              value={formData.groomDetails?.brideName || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("groomDetails", "brideName", e.target.value)
-                              }
-                            />
-                            <FormInput
-                              id="groomDetails-brideFullName"
-                              label="Bride's Full Name"
-                              placeholder="e.g., Afifa Atira"
-                              value={formData.groomDetails?.brideFullName || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("groomDetails", "brideFullName", e.target.value)
-                              }
-                            />
-                            <FormInput
-                              type="url"
-                              id="groomDetails-brideImageUrl"
-                              label="Bride's Photo URL"
-                              placeholder="https://example.com/bride-photo.jpg"
-                              value={formData.groomDetails?.brideImageUrl || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("groomDetails", "brideImageUrl", e.target.value)
-                              }
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Event Details Section */}
-                  <div className="border rounded-lg">
-                    <button
-                      onClick={() => toggleSection("events")}
-                      className="w-full flex items-center justify-between p-3 text-left hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span className="font-medium">Event Details</span>
-                      </div>
-                      {expandedSections.has("events") ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </button>
-                    {expandedSections.has("events") && (
-                      <div className="p-3 border-t space-y-6">
-                        {/* Akad Event */}
-                        <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-3">Akad</h4>
-                          <div className="space-y-3">
-                            <FormInput
-                              id="eventDetails-akadEventName"
-                              label="Akad Event Name"
-                              placeholder="e.g., Akad Nikah"
-                              value={formData.eventDetails?.akadEventName || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("eventDetails", "akadEventName", e.target.value)
-                              }
-                            />
-                            <FormInput
-                              type="datetime-local"
-                              id="eventDetails-akadDatetimeStart"
-                              label="Akad Start Date & Time"
-                              value={formData.eventDetails?.akadDatetimeStart || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("eventDetails", "akadDatetimeStart", e.target.value)
-                              }
-                            />
-                            <FormInput
-                              type="datetime-local"
-                              id="eventDetails-akadDatetimeEnd"
-                              label="Akad End Date & Time"
-                              value={formData.eventDetails?.akadDatetimeEnd || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("eventDetails", "akadDatetimeEnd", e.target.value)
-                              }
-                            />
-                            <FormInput
-                              id="eventDetails-akadLocation"
-                              label="Akad Location"
-                              placeholder="e.g., Masjid Istiqlal"
-                              value={formData.eventDetails?.akadLocation || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("eventDetails", "akadLocation", e.target.value)
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        {/* Reception Event */}
-                        <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-3">Reception</h4>
-                          <div className="space-y-3">
-                            <FormInput
-                              id="eventDetails-resepsiEventName"
-                              label="Reception Event Name"
-                              placeholder="e.g., Resepsi"
-                              value={formData.eventDetails?.resepsiEventName || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("eventDetails", "resepsiEventName", e.target.value)
-                              }
-                            />
-                            <FormInput
-                              type="datetime-local"
-                              id="eventDetails-resepsiDatetimeStart"
-                              label="Reception Start Date & Time"
-                              value={formData.eventDetails?.resepsiDatetimeStart || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("eventDetails", "resepsiDatetimeStart", e.target.value)
-                              }
-                            />
-                            <FormInput
-                              type="datetime-local"
-                              id="eventDetails-resepsiDatetimeEnd"
-                              label="Reception End Date & Time"
-                              value={formData.eventDetails?.resepsiDatetimeEnd || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("eventDetails", "resepsiDatetimeEnd", e.target.value)
-                              }
-                            />
-                            <FormInput
-                              id="eventDetails-resepsiLocation"
-                              label="Reception Location"
-                              placeholder="e.g., Grand Ballroom"
-                              value={formData.eventDetails?.resepsiLocation || ""}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                handleInputChange("eventDetails", "resepsiLocation", e.target.value)
-                              }
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Additional Information Section */}
-                  <div className="border rounded-lg">
-                    <button
-                      onClick={() => toggleSection("additional")}
-                      className="w-full flex items-center justify-between p-3 text-left hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Info className="h-4 w-4" />
-                        <span className="font-medium">Additional Information</span>
-                      </div>
-                      {expandedSections.has("additional") ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </button>
-                    {expandedSections.has("additional") && (
-                      <div className="p-3 border-t space-y-4">
-                        <FormTextarea
-                          id="additional-additionalNote"
-                          label="Additional Notes"
-                          placeholder="Any additional information for your guests"
-                          rows={4}
-                          value={formData.additional?.additionalNote || ""}
-                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                            handleInputChange("additional", "additionalNote", e.target.value)
-                          }
-                        />
-                      </div>
-                    )}
-                  </div>
-                </>
+                <FormRenderer
+                  sections={weddingFormSections}
+                  data={getWeddingDetails()}
+                  expandedSections={expandedSections}
+                  onToggleSection={toggleSection}
+                  onFieldChange={updateField}
+                  pendingFieldFocus={pendingFieldFocus}
+                />
               )}
             </div>
           </div>
