@@ -284,3 +284,36 @@ export async function updateInvitation(
   );
   return response.data;
 }
+
+/**
+ * Fetches a published invitation by its URL and type for public display.
+ * This is a public request and does not require authentication.
+ * @param invitationUrl The URL slug of the invitation.
+ * @param invitationType The type of invitation ("Wedding" or "Event").
+ * @returns The invitation object with its theme data.
+ */
+export async function getPublicInvitation(
+  invitationUrl: string,
+  invitationType: "Wedding" | "Event",
+): Promise<Invitation> {
+  // Build query to find invitation by URL and type
+  // For now, we'll also include draft invitations for testing (remove this in production)
+  const query = `/api/invitations?filters[invitationUrl][$eq]=${encodeURIComponent(invitationUrl)}&filters[invitationType][$eq]=${invitationType}&populate[theme]=true&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][eventDetails][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][openingSection][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][coverSection][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][medias][populate][medias][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][groomDetails][populate][parentProfiles][populate]=*`;
+
+  const response = await fetchApi<StrapiCollectionResponse<Invitation>>(query, {
+    method: "GET",
+  });
+
+  // Check if invitation was found
+  if (!response.data || response.data.length === 0) {
+    throw new Error("Invitation not found");
+  }
+
+  // For production, add this check back:
+  // const invitation = response.data[0];
+  // if (invitation.invitationStatus !== 'published') {
+  //   throw new Error("Invitation not found or not published");
+  // }
+
+  return response.data[0]; // Return the first (and should be only) result
+}
