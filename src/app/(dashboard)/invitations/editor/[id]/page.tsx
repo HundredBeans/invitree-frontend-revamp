@@ -5,9 +5,6 @@ import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import {
   Button,
-  Card,
-  CardContent,
-  CardHeader,
   FormInput,
 } from "@/components/ui";
 import { InvitationPreview } from "@/components/invitation-preview";
@@ -16,6 +13,7 @@ import { getInvitationById, updateInvitation } from "@/lib/strapi";
 import type { Invitation, InvitationContent } from "@/types/invitation";
 import { FormRenderer } from "@/components/form-renderer";
 import { weddingFormSections } from "@/config/wedding-form-config";
+import { PaymentStatusCard } from "@/components/payment/payment-status-card";
 import {
   Edit3,
   Save,
@@ -382,6 +380,19 @@ export default function InvitationEditorPage() {
                   onFieldChange={updateField}
                   pendingFieldFocus={pendingFieldFocus}
                 />
+              )}
+
+              {/* Payment Status Card - Only show for draft invitations */}
+              {invitation && invitation.invitationStatus === "draft" && (
+                <div className="pt-4 border-t">
+                  <PaymentStatusCard
+                    invitation={{
+                      id: invitation.documentId,
+                      invitationStatus: invitation.invitationStatus,
+                      invitationTitle: invitation.invitationTitle,
+                    }}
+                  />
+                </div>
               )}
             </div>
           </div>

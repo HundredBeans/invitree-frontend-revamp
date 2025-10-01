@@ -2,23 +2,15 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { type JSX, useEffect, useState } from "react";
+import { type ReactNode, useEffect } from "react";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard/header";
-import { 
+import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui";
 
-interface Invitation {
-  id: string;
-  title: string;
-  status: "draft" | "published";
-  createdAt: string;
-  updatedAt: string;
-}
-
-export default function DashboardLayout({ children }: { children: JSX.Element }) {
+export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
   const router = useRouter();
 

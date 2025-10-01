@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui";
-import { Plus, FileText, Check, Edit, ExternalLink } from "lucide-react";
+import { Plus, FileText, Check, Edit, ExternalLink, Crown } from "lucide-react";
 import Link from "next/link";
 import { getUserInvitations } from "@/lib/strapi";
 import { useErrorHandler } from "@/hooks/use-error-handler";
@@ -188,6 +188,17 @@ export default function InvitationsPage() {
                         <Button variant="ghost" size="sm">
                           <ExternalLink className="h-4 w-4 mr-1" />
                           View
+                        </Button>
+                      </Link>
+                    )}
+                    {invitation.invitationStatus === "draft" && (
+                      <Link href={`/invitations/upgrade/${invitation.documentId}`}>
+                        <Button
+                          size="sm"
+                          className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0 shadow-sm hover:shadow-md transition-all"
+                        >
+                          <Crown className="h-4 w-4 mr-1" />
+                          Upgrade
                         </Button>
                       </Link>
                     )}
