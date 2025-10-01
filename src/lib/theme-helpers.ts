@@ -36,12 +36,12 @@ export function extractFormDataFromTypeSpecificDetails(
     };
   }
 
-  // Groom details (assuming first is groom, second is bride)
-  if (weddingDetails.groomDetails && weddingDetails.groomDetails.length > 0) {
-    const groom = weddingDetails.groomDetails.find(detail => detail.gender === "male");
-    const bride = weddingDetails.groomDetails.find(detail => detail.gender === "female");
+  // Couple details (bride and groom)
+  if (weddingDetails.coupleDetails && weddingDetails.coupleDetails.length > 0) {
+    const groom = weddingDetails.coupleDetails.find(detail => detail.gender === "male");
+    const bride = weddingDetails.coupleDetails.find(detail => detail.gender === "female");
 
-    formData.groomDetails = {
+    formData.coupleDetails = {
       groomName: groom?.name || "",
       groomFullName: groom?.fullName || "",
       groomImageUrl: groom?.imageUrl || "",
@@ -139,26 +139,26 @@ export function convertFormDataToTypeSpecificDetails(
       },
     ],
     medias: existingWeddingDetails?.medias || null,
-    groomDetails: [
+    coupleDetails: [
       {
-        id: existingWeddingDetails?.groomDetails?.[0]?.id || 1,
-        name: formData.groomDetails?.groomName || "",
+        id: existingWeddingDetails?.coupleDetails?.[0]?.id || 1,
+        name: formData.coupleDetails?.groomName || "",
         gender: "male" as const,
-        fullName: formData.groomDetails?.groomFullName || "",
-        imageUrl: formData.groomDetails?.groomImageUrl || null,
-        birthOrder: formData.groomDetails?.groomBirthOrder ? 
-          parseInt(formData.groomDetails.groomBirthOrder) : null,
-        additionalInfo: formData.groomDetails?.groomAdditionalInfo || null,
+        fullName: formData.coupleDetails?.groomFullName || "",
+        imageUrl: formData.coupleDetails?.groomImageUrl || null,
+        birthOrder: formData.coupleDetails?.groomBirthOrder ?
+          parseInt(formData.coupleDetails.groomBirthOrder) : null,
+        additionalInfo: formData.coupleDetails?.groomAdditionalInfo || null,
       },
       {
-        id: existingWeddingDetails?.groomDetails?.[1]?.id || 2,
-        name: formData.groomDetails?.brideName || "",
+        id: existingWeddingDetails?.coupleDetails?.[1]?.id || 2,
+        name: formData.coupleDetails?.brideName || "",
         gender: "female" as const,
-        fullName: formData.groomDetails?.brideFullName || "",
-        imageUrl: formData.groomDetails?.brideImageUrl || null,
-        birthOrder: formData.groomDetails?.brideBirthOrder ? 
-          parseInt(formData.groomDetails.brideBirthOrder) : null,
-        additionalInfo: formData.groomDetails?.brideAdditionalInfo || null,
+        fullName: formData.coupleDetails?.brideFullName || "",
+        imageUrl: formData.coupleDetails?.brideImageUrl || null,
+        birthOrder: formData.coupleDetails?.brideBirthOrder ?
+          parseInt(formData.coupleDetails.brideBirthOrder) : null,
+        additionalInfo: formData.coupleDetails?.brideAdditionalInfo || null,
       },
     ],
   };

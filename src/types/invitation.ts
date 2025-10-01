@@ -34,7 +34,7 @@ export interface EventDetail {
   eventLocation: string;
 }
 
-export interface GroomDetail {
+export interface CoupleDetail {
   id: number;
   name: string;
   gender: "male" | "female";
@@ -52,7 +52,7 @@ export interface WeddingDetails {
   openingSection: OpeningSection;
   eventDetails: EventDetail[];
   medias?: any | null;
-  groomDetails: GroomDetail[];
+  coupleDetails: CoupleDetail[];
 }
 
 export type TypeSpecificDetails = WeddingDetails[];
@@ -79,7 +79,7 @@ export interface CreateInvitationData {
   invitationUrl: string;
   invitationType: "Wedding" | "Event";
   eventDate?: string;
-  theme: number; // Theme ID
+  theme: string; // Theme documentId (Strapi v5 uses documentId for relations)
   owner: number; // User ID
   typeSpecificDetails?: any[]; // Default data based on invitation type
 }

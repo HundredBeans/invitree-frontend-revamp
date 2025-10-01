@@ -80,9 +80,10 @@ export async function loginUser(
 }
 
 /**
- * Fetches the invitations for a specific user.
+ * Fetches the invitations for the authenticated user.
  * This function requires an authenticated request.
- * @param userId The ID of the user.
+ * The backend automatically filters invitations by the authenticated user and handles deep population.
+ * @param userId The ID of the user (kept for backwards compatibility, but not used in query).
  * @param jwt The user's JSON Web Token for authentication.
  * @returns A list of the user's invitations.
  */
@@ -94,17 +95,15 @@ export async function getUserInvitations(
     throw new Error("User ID and JWT are required to fetch invitations.");
   }
 
-  const query = `/api/invitations?filters[owner][id][$eq]=${userId}&populate=*`;
-
-  const response = await fetchApi<StrapiCollectionResponse<Invitation>>(query, {
+  // Backend automatically filters by authenticated user and handles deep population
+  const response = await fetchApi<StrapiCollectionResponse<Invitation>>("/api/invitations", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${jwt}`,
     },
   });
-  console.log("response", response);
 
-  // The response from Strapi is often { data: [...], meta: {...} }
+  // The response from Strapi is { data: [...], meta: {...} }
   return response.data;
 }
 
@@ -125,14 +124,14 @@ export async function getThemes(): Promise<Theme[]> {
 
 /**
  * Creates a new draft invitation for a user.
- * @param themeId The ID of the theme being used.
+ * @param themeDocumentId The documentId of the theme being used.
  * @param userId The ID of the owner.
  * @param jwt The user's JSON Web Token for authentication.
  * @param invitationType The type of invitation to create (defaults to "Wedding").
  * @returns The newly created invitation object.
  */
 export async function createInvitation(
-  themeId: number,
+  themeDocumentId: string,
   userId: number,
   jwt: string,
   invitationType: "Wedding" | "Event" = "Wedding",
@@ -145,7 +144,7 @@ export async function createInvitation(
     invitationUrl: `${invitationType.toLowerCase()}-${timestamp}`,
     invitationType: invitationType,
     eventDate: defaultData.eventDate,
-    theme: themeId,
+    theme: themeDocumentId,
     owner: userId,
     typeSpecificDetails: defaultData.typeSpecificDetails,
   };
@@ -168,8 +167,9 @@ export async function createInvitation(
 }
 
 /**
- * Fetches a single invitation by its ID, ensuring to populate the theme.
- * @param id The ID of the invitation.
+ * Fetches a single invitation by its ID.
+ * Backend handles deep population automatically.
+ * @param id The documentId of the invitation.
  * @param jwt The user's JSON Web Token.
  * @returns The invitation object with its theme data.
  */
@@ -177,9 +177,8 @@ export async function getInvitationById(
   id: string,
   jwt: string,
 ): Promise<Invitation> {
-  // We add `publicationState=preview` to include draft entries in the result.
-  const query = `/api/invitations/${id}?&publicationState=preview&populate[theme]=true&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][eventDetails][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][openingSection][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][coverSection][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][medias][populate][medias][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][groomDetails][populate][parentProfiles][populate]=*`;
-  const response = await fetchApi<StrapiSingleResponse<Invitation>>(query, {
+  // Backend handles deep population and draft access automatically
+  const response = await fetchApi<StrapiSingleResponse<Invitation>>(`/api/invitations/${id}`, {
     method: "GET",
     headers: { Authorization: `Bearer ${jwt}` },
   });
@@ -288,6 +287,7 @@ export async function updateInvitation(
 /**
  * Fetches a published invitation by its URL and type for public display.
  * This is a public request and does not require authentication.
+ * Backend handles all the deep population automatically.
  * @param invitationUrl The URL slug of the invitation.
  * @param invitationType The type of invitation ("Wedding" or "Event").
  * @returns The invitation object with its theme data.
@@ -296,24 +296,17 @@ export async function getPublicInvitation(
   invitationUrl: string,
   invitationType: "Wedding" | "Event",
 ): Promise<Invitation> {
-  // Build query to find invitation by URL and type
-  // For now, we'll also include draft invitations for testing (remove this in production)
-  const query = `/api/invitations?filters[invitationUrl][$eq]=${encodeURIComponent(invitationUrl)}&filters[invitationType][$eq]=${invitationType}&populate[theme]=true&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][eventDetails][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][openingSection][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][coverSection][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][medias][populate][medias][populate]=*&populate[typeSpecificDetails][on][invitation-details.wedding-details][populate][groomDetails][populate][parentProfiles][populate]=*`;
+  // Use the new public route - backend handles deep population
+  const query = `/api/invitations/public/${encodeURIComponent(invitationUrl)}?invitationType=${invitationType}`;
 
-  const response = await fetchApi<StrapiCollectionResponse<Invitation>>(query, {
+  const response = await fetchApi<StrapiSingleResponse<Invitation>>(query, {
     method: "GET",
   });
 
   // Check if invitation was found
-  if (!response.data || response.data.length === 0) {
-    throw new Error("Invitation not found");
+  if (!response.data) {
+    throw new Error("Invitation not found or not published");
   }
 
-  // For production, add this check back:
-  // const invitation = response.data[0];
-  // if (invitation.invitationStatus !== 'published') {
-  //   throw new Error("Invitation not found or not published");
-  // }
-
-  return response.data[0]; // Return the first (and should be only) result
+  return response.data;
 }

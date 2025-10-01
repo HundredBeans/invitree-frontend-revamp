@@ -64,14 +64,14 @@ export function InvitationPreview({
           return weddingDetails.openingSection?.decorationUrl || "";
         case "opening.imageUrl":
           return weddingDetails.openingSection?.imageUrl || "";
-        case "groomDetails.groomName":
-          return weddingDetails.groomDetails?.find(d => d.gender === "male")?.name || "";
-        case "groomDetails.groomFullName":
-          return weddingDetails.groomDetails?.find(d => d.gender === "male")?.fullName || "";
-        case "groomDetails.brideName":
-          return weddingDetails.groomDetails?.find(d => d.gender === "female")?.name || "";
-        case "groomDetails.brideFullName":
-          return weddingDetails.groomDetails?.find(d => d.gender === "female")?.fullName || "";
+        case "coupleDetails.groomName":
+          return weddingDetails.coupleDetails?.find(d => d.gender === "male")?.name || "";
+        case "coupleDetails.groomFullName":
+          return weddingDetails.coupleDetails?.find(d => d.gender === "male")?.fullName || "";
+        case "coupleDetails.brideName":
+          return weddingDetails.coupleDetails?.find(d => d.gender === "female")?.name || "";
+        case "coupleDetails.brideFullName":
+          return weddingDetails.coupleDetails?.find(d => d.gender === "female")?.fullName || "";
         case "eventDetails.akadEventName":
           return weddingDetails.eventDetails?.find(e => e.eventName.toLowerCase().includes("akad"))?.eventName || "";
         case "eventDetails.akadLocation":

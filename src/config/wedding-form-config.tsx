@@ -57,8 +57,8 @@ export const weddingFormSections: FormSection[] = [
     ],
   },
   {
-    id: "groomDetails",
-    title: "Groom Details",
+    id: "coupleDetails",
+    title: "Couple Details",
     icon: Users,
     isArray: true,
     arrayItemTitle: (item: any) => item.gender === "male" ? "Groom" : "Bride",

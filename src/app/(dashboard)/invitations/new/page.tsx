@@ -48,7 +48,7 @@ export default function NewInvitationPage() {
     fetchThemes();
   }, [session, status, router]);
 
-  const handleThemeSelect = async (themeId: number) => {
+  const handleThemeSelect = async (themeDocumentId: string) => {
     if (!session) return;
     setIsCreating(true);
     setError(null);
@@ -61,7 +61,7 @@ export default function NewInvitationPage() {
         throw new Error("Authentication error. Please log in again.");
       }
 
-      const newInvitation = await createInvitation(themeId, userId, jwt, selectedInvitationType);
+      const newInvitation = await createInvitation(themeDocumentId, userId, jwt, selectedInvitationType);
       // Redirect to the editor page for the new invitation
       router.push(`/invitations/editor/${newInvitation.documentId}`);
     } catch (err: any) {
@@ -165,7 +165,7 @@ export default function NewInvitationPage() {
               key={theme.id}
               type="button"
               className="border rounded-lg bg-white shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-105 w-full text-left"
-              onClick={() => handleThemeSelect(theme.id)}
+              onClick={() => handleThemeSelect(theme.documentId)}
             >
               <div className="relative w-full h-60">
                 <Image

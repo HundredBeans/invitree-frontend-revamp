@@ -66,16 +66,16 @@ export function WeddingOrnamentalTheme({
     }
   };
 
-  const groomDetails = weddingDetails.groomDetails?.find(d => d.gender === "male");
-  const brideDetails = weddingDetails.groomDetails?.find(d => d.gender === "female");
+  const groomDetails = weddingDetails.coupleDetails?.find(d => d.gender === "male");
+  const brideDetails = weddingDetails.coupleDetails?.find(d => d.gender === "female");
   const akadEvent = weddingDetails.eventDetails?.find(e => e.eventName?.toLowerCase().includes("akad"));
   const resepsiEvent = weddingDetails.eventDetails?.find(e =>
     e.eventName?.toLowerCase().includes("resepsi") ||
     e.eventName?.toLowerCase().includes("reception")
   );
 
-  const groomIndex = weddingDetails.groomDetails?.findIndex(d => d.gender === "male") ?? -1;
-  const brideIndex = weddingDetails.groomDetails?.findIndex(d => d.gender === "female") ?? -1;
+  const groomIndex = weddingDetails.coupleDetails?.findIndex(d => d.gender === "male") ?? -1;
+  const brideIndex = weddingDetails.coupleDetails?.findIndex(d => d.gender === "female") ?? -1;
   const akadIndex = weddingDetails.eventDetails?.findIndex(e => e.eventName?.toLowerCase().includes("akad")) ?? -1;
   const resepsiIndex = weddingDetails.eventDetails?.findIndex(e =>
     e.eventName?.toLowerCase().includes("resepsi") ||
@@ -357,7 +357,7 @@ export function WeddingOrnamentalTheme({
                     )}
 
                     {createEditableElement(
-                      "groomDetails",
+                      "coupleDetails",
                       `${groomIndex}.name`,
                       groomDetails.name,
                       "text-3xl sm:text-4xl font-serif text-gray-800 mb-3"
@@ -365,7 +365,7 @@ export function WeddingOrnamentalTheme({
 
                     {groomDetails.fullName &&
                       createEditableElement(
-                        "groomDetails",
+                        "coupleDetails",
                         `${groomIndex}.fullName`,
                         groomDetails.fullName,
                         "text-xl text-gray-600 mb-6 font-light"
@@ -415,7 +415,7 @@ export function WeddingOrnamentalTheme({
                     )}
 
                     {createEditableElement(
-                      "groomDetails",
+                      "coupleDetails",
                       `${brideIndex}.name`,
                       brideDetails.name,
                       "text-3xl sm:text-4xl font-serif text-gray-800 mb-3"
@@ -423,7 +423,7 @@ export function WeddingOrnamentalTheme({
 
                     {brideDetails.fullName &&
                       createEditableElement(
-                        "groomDetails",
+                        "coupleDetails",
                         `${brideIndex}.fullName`,
                         brideDetails.fullName,
                         "text-xl text-gray-600 mb-6 font-light"

@@ -29,6 +29,7 @@ export interface StructureBlueprint {
 
 export interface Theme {
   id: number;
+  documentId: string;
   themeName: string;
   slug: string;
   thumbnailUrl: string;

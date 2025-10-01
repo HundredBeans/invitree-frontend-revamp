@@ -48,7 +48,7 @@ export function getDefaultInvitationData(invitationType: "Wedding" | "Event"): D
               eventLocation: "Reception Hall"
             }
           ],
-          groomDetails: [
+          coupleDetails: [
             {
               name: "Groom Name",
               gender: "male",
